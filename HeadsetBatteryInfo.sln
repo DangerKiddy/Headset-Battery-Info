@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33723.286
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeadsetBatteryInfo", "HeadsetBatteryInfo.csproj", "{DB722FE9-6B73-47C8-A3ED-DFB5147A3235}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DB722FE9-6B73-47C8-A3ED-DFB5147A3235}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB722FE9-6B73-47C8-A3ED-DFB5147A3235}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DB722FE9-6B73-47C8-A3ED-DFB5147A3235}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB722FE9-6B73-47C8-A3ED-DFB5147A3235}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5ADC9170-26B8-48B6-ADA7-903AFFCA5009}
+	EndGlobalSection
+EndGlobal
