@@ -39,6 +39,7 @@ namespace HeadsetBatteryInfo
             OSC.AddReceiveHeadsetCallback(OnOSCReceiveHeadset);
             OSC.AddReceiveBatteryLevelCallback(OnReceiveBatteryLevel);
             OSC.AddReceiveBatteryStateCallback(OnReceiveBatteryState);
+            OSC.AddReceiveCompanyNameCallback(OnReceiveCompanyName);
 
             OSC.StartListening();
         }
@@ -46,6 +47,13 @@ namespace HeadsetBatteryInfo
         private void OnOSCReceiveHeadset()
         {
             SetStatusText("Received headset, confirming...");
+        }
+
+        private void OnReceiveCompanyName(string company)
+        {
+            ConfirmHeadsetPair();
+
+            DeviceIcons.SetCompany(company);
         }
 
         private void OnReceiveBatteryLevel(int level, DeviceType device)

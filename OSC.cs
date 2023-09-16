@@ -51,6 +51,13 @@ namespace HeadsetBatteryInfo
             onReceiveBatteryState += callback;
         }
 
+        public delegate void receiveCompanyName(string company);
+        private static receiveCompanyName onReceiveCompanyName;
+        public static void AddReceiveCompanyNameCallback(receiveCompanyName callback)
+        {
+            onReceiveCompanyName += callback;
+        }
+
         public static void StartListening()
         {
             Listen();
@@ -95,6 +102,11 @@ namespace HeadsetBatteryInfo
                             udp.Send(buffer, buffer.Length, new IPEndPoint(incomingIP.Address, port));
 
                             onReceiveHeadset();
+
+                            break;
+
+                        case "/battery/headset/company":
+                            onReceiveCompanyName((string)msg.value);
 
                             break;
 
