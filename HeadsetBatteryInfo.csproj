@@ -128,5 +128,8 @@
     <Resource Include="Assets\Images\pico\left_controller_charging.png" />
     <Resource Include="Assets\Images\pico\right_controller_charging.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Assets\Sounds\charging_stopped.wav" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

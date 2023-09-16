@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Media;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -111,8 +112,21 @@ namespace HeadsetBatteryInfo
 
             CompanyLogo.BeginAnimation(OpacityProperty, showAnim);
             Headset.BeginAnimation(OpacityProperty, showAnim);
-            ControllerLeft.BeginAnimation(OpacityProperty, showAnim);
-            ControllerRight.BeginAnimation(OpacityProperty, showAnim);
+            //ControllerLeft.BeginAnimation(OpacityProperty, showAnim);
+            //ControllerRight.BeginAnimation(OpacityProperty, showAnim);
+        }
+
+        private static SoundPlayer sound;
+        public static void PlayBatteryStateSound()
+        {
+            if (sound == null)
+            {
+                sound = new SoundPlayer();
+                sound.SoundLocation = "Assets/Sounds/charging_stopped.wav";
+                sound.Load();
+            }
+
+            sound.Play();
         }
 
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)

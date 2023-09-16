@@ -1,4 +1,6 @@
-﻿namespace HeadsetBatteryInfo
+﻿using System;
+
+namespace HeadsetBatteryInfo
 {
     internal static class BatteryInfoReceiver
     {
@@ -26,8 +28,6 @@
 
         public static void OnReceiveBatteryState(bool isCharging, DeviceType device)
         {
-            isHeadsetCharging = isCharging;
-
             switch (device)
             {
                 case DeviceType.Headset:
@@ -48,14 +48,23 @@
             }
         }
 
+        private static int currentHeadsetLevel = 100;
         private static bool isHeadsetCharging = false;
         public static void OnHeadsetBatteryStateChanged(bool isCharging)
         {
             isHeadsetCharging = isCharging;
+
+            OnHeadsetBatteryLevelChanged(currentHeadsetLevel); // required for updating icon
+
+            if (!isCharging)
+            {
+                MainWindow.PlayBatteryStateSound();
+            }
         }
 
         public static void OnHeadsetBatteryLevelChanged(int level)
         {
+            currentHeadsetLevel = level;
             MainWindow.SetHeadsetText(level + "%");
 
             DeviceIcons.HeadsetIcons deviceIcons = DeviceIcons.GetCurrentDeviceIcons();
