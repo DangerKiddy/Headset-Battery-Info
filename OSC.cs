@@ -1,15 +1,21 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Markup;
 
 namespace HeadsetBatteryInfo
 {
     internal class OSC
     {
         private const string ipAddress = "127.0.0.1";
-        private const int port = 28092;
+        private const int headsetPort = 28092;
+        private const int vrcSendPort = 9000;
+
+        public const string vrcHeadsetBatteryLvlAddress = "/avatar/parameters/headsetBatteryLevel";
+        public const string vrcHeadsetBatteryStateAddress = "/avatar/parameters/isHeadsetCharging";
 
         private static UdpClient udp;
         public static bool Init()
@@ -18,13 +24,13 @@ namespace HeadsetBatteryInfo
 
             try
             {
-                udp = new UdpClient(port);
+                udp = new UdpClient(headsetPort);
 
                 isSuccess = true;
             }
             catch
             {
-                Console.WriteLine($"Failed to create listen socket! (Another app listening on {ipAddress}:{port} already?)");
+                Console.WriteLine($"Failed to create listen socket! (Another app listening on {ipAddress}:{headsetPort} already?)");
             }
 
             return isSuccess;
@@ -85,6 +91,12 @@ namespace HeadsetBatteryInfo
 
                 if (msg.success)
                 {
+                    foreach(byte b in data.Buffer)
+                    {
+                        Console.Write((char)b);
+                    }
+                    Console.WriteLine();
+
                     switch (msg.address)
                     {
                         case "/netLocalIpAddress":
@@ -99,7 +111,7 @@ namespace HeadsetBatteryInfo
                             AlignStringBytes(ref sendBack);
 
                             var buffer = Encoding.ASCII.GetBytes(sendBack);
-                            udp.Send(buffer, buffer.Length, new IPEndPoint(incomingIP.Address, port));
+                            udp.Send(buffer, buffer.Length, new IPEndPoint(incomingIP.Address, headsetPort));
 
                             onReceiveHeadset();
 
@@ -111,12 +123,14 @@ namespace HeadsetBatteryInfo
                             break;
 
                         case "/battery/headset/level":
-                            onReceiveBatteryLevel((int)msg.value, DeviceType.Headset);
+                            var batteryLevel = (int)msg.value;
+                            onReceiveBatteryLevel(batteryLevel, DeviceType.Headset);
 
                             break;
 
                         case "/battery/headset/charging":
-                            onReceiveBatteryState((bool)msg.value, DeviceType.Headset);
+                            var isHeadsetCharging = (bool)msg.value;
+                            onReceiveBatteryState(isHeadsetCharging, DeviceType.Headset);
 
                             break;
 
@@ -144,19 +158,37 @@ namespace HeadsetBatteryInfo
                 str += '\0';
             }
         }
-
-        private static byte[] EncodeString(string str)
+        public static void SendFloatToVRC(string address, float value)
         {
-            int len = str.Length + (4 - str.Length % 4);
-            if (len <= str.Length)
-                len = len + 4;
+            var sendBack = address + '\0';
+            AlignStringBytes(ref sendBack);
 
-            byte[] msg = new byte[len];
+            sendBack += ",f";
+            AlignStringBytes(ref sendBack);
 
-            var bytes = Encoding.ASCII.GetBytes(str);
-            bytes.CopyTo(msg, 0);
+            var buffer = Encoding.ASCII.GetBytes(sendBack);
+            var finalBuffer = new byte[buffer.Length + 4];
+            Array.Copy(buffer, finalBuffer, buffer.Length);
 
-            return msg;
+            var bytes = BitConverter.GetBytes(value);
+            finalBuffer[buffer.Length + 0] = bytes[3];
+            finalBuffer[buffer.Length + 1] = bytes[2];
+            finalBuffer[buffer.Length + 2] = bytes[1];
+            finalBuffer[buffer.Length + 3] = bytes[0];
+
+            udp.Send(finalBuffer, finalBuffer.Length, new IPEndPoint(IPAddress.Parse("127.0.0.1"), vrcSendPort));
+        }
+        public static void SendBoolToVRC(string address, bool value)
+        {
+            var sendBack = address + '\0';
+            AlignStringBytes(ref sendBack);
+
+            sendBack += ",";
+            sendBack += value ? "T" : "F";
+            AlignStringBytes(ref sendBack);
+
+            var buffer = Encoding.ASCII.GetBytes(sendBack);
+            udp.Send(buffer, buffer.Length, new IPEndPoint(IPAddress.Parse("127.0.0.1"), vrcSendPort));
         }
 
         struct Msg

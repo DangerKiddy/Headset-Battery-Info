@@ -15,6 +15,11 @@ namespace HeadsetBatteryInfo
         {
             InitializeComponent();
 
+            CompanyLogo.Opacity = 0;
+            Headset.Opacity = 0;
+            ControllerLeft.Opacity = 0;
+            ControllerRight.Opacity = 0;
+
             Instance = this;
 
             var showAnim = new DoubleAnimation();

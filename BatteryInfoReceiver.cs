@@ -54,12 +54,14 @@ namespace HeadsetBatteryInfo
         {
             isHeadsetCharging = isCharging;
 
-            OnHeadsetBatteryLevelChanged(currentHeadsetLevel); // required for updating icon
+            OnHeadsetBatteryLevelChanged(currentHeadsetLevel); // required for updating icon and letting vrc know about latest battery lvl
 
             if (!isCharging)
             {
                 MainWindow.PlayBatteryStateSound();
             }
+
+            OSC.SendBoolToVRC(OSC.vrcHeadsetBatteryStateAddress, isHeadsetCharging);
         }
 
         public static void OnHeadsetBatteryLevelChanged(int level)
@@ -84,6 +86,8 @@ namespace HeadsetBatteryInfo
             {
                 MainWindow.ChangeHeadsetIcon(icons.lowBattery);
             }
+
+            OSC.SendFloatToVRC(OSC.vrcHeadsetBatteryLvlAddress, currentHeadsetLevel / 100f);
         }
     }
 }

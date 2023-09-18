@@ -9,8 +9,9 @@
         MouseDown="Window_MouseDown">
     <Window.Background>
         <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-            <GradientStop Color="#FF272727" Offset="1"/>
-            <GradientStop Color="#FF1B1B1B" Offset="0"/>
+            <GradientStop Color="#FF212224" Offset="1"/>
+            <GradientStop Color="#FF1C2731" Offset="0"/>
+            <GradientStop Color="#FF1E242C" Offset="0.504"/>
         </LinearGradientBrush>
     </Window.Background>
     <Border Margin="10,10,10,10">
@@ -141,21 +142,21 @@
                         <RowDefinition/>
                     </Grid.RowDefinitions>
 
-                    <Border x:Name="Headset" Grid.Row="0" Opacity="0">
+                    <Border x:Name="Headset" Grid.Row="0">
                         <Grid>
                             <Image x:Name="HeadsetIcon" Width="57" Stretch="Fill" Canvas.Left="0" Height="57" HorizontalAlignment="Left" VerticalAlignment="Center" Source="/Assets/Images/pico/headset.png"/>
                             <TextBlock x:Name="HeadsetText" Text="100%" Canvas.Left="58" Canvas.Top="13" HorizontalAlignment="Center" Foreground="White" FontSize="24" VerticalAlignment="Center"/>
                         </Grid>
                     </Border>
 
-                    <Border x:Name="ControllerLeft" Grid.Row="1" Opacity="0">
+                    <Border x:Name="ControllerLeft" Grid.Row="1">
                         <Grid>
                             <Image x:Name="ControllerLeftIcon" Width="57" Source="/Assets/Images/pico/left_controller.png" Stretch="Fill" Canvas.Left="0" Height="57" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                             <TextBlock x:Name="ControllerLeftText" Text="100%" Canvas.Left="58" Canvas.Top="13" HorizontalAlignment="Center" Foreground="White" FontSize="24" VerticalAlignment="Center"/>
                         </Grid>
                     </Border>
 
-                    <Border x:Name="ControllerRight" Grid.Row="2" Opacity="0">
+                    <Border x:Name="ControllerRight" Grid.Row="2">
                         <Grid>
                             <Image x:Name="ControllerRightIcon" Width="57" Source="/Assets/Images/pico/right_controller.png" Stretch="Fill" Canvas.Left="0" Height="57" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                             <TextBlock x:Name="ControllerRightText" Text="100%" Canvas.Left="58" Canvas.Top="13" HorizontalAlignment="Center" Foreground="White" FontSize="24" VerticalAlignment="Center"/>
@@ -163,7 +164,7 @@
                     </Border>
                 </Grid>
 
-                <Image x:Name="CompanyLogo" HorizontalAlignment="Left" Height="150" VerticalAlignment="Center" Width="150" Source="/Assets/Images/pico/logo.png" Margin="10,0,0,0" Panel.ZIndex="1" Grid.ColumnSpan="2" Opacity="0"/>
+                <Image x:Name="CompanyLogo" HorizontalAlignment="Left" Height="150" VerticalAlignment="Center" Width="150" Source="/Assets/Images/pico/logo.png" Margin="10,0,0,0" Panel.ZIndex="1" Grid.ColumnSpan="2"/>
             </Grid>
             <TextBlock x:Name="StatusText" Text="Waiting for headset..." Foreground="White" FontSize="14" Panel.ZIndex="10" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" Opacity="0"/>
         </Grid>

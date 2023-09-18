@@ -139,7 +139,6 @@ namespace HeadsetBatteryInfo
             headsetIcons.rightController.mediumBattery = ChangeImageColor(icons.headsetIcon, mediumBattery);
             headsetIcons.rightController.lowBattery = ChangeImageColor(icons.headsetIcon, lowBattery);
         }
-
         private static ImageSource ConvertBitmapToImageSource(System.Drawing.Bitmap bitmap)
         {
             MemoryStream memoryStream = new MemoryStream();
