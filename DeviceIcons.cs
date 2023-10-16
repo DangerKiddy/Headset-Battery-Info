@@ -58,6 +58,17 @@ namespace HeadsetBatteryInfo
         public static HeadsetIcons Pico;
         public static HeadsetIcons Meta;
 
+        private static SolidColorBrush blueSolid = new SolidColorBrush();
+        private static SolidColorBrush greenSolid = new SolidColorBrush();
+        private static SolidColorBrush yellowSolid = new SolidColorBrush();
+        private static SolidColorBrush redSolid = new SolidColorBrush();
+        private static SolidColorBrush greySolid = new SolidColorBrush();
+        private static LinearGradientBrush blueGradientBrush = new LinearGradientBrush();
+        private static LinearGradientBrush greenGradientBrush = new LinearGradientBrush();
+        private static LinearGradientBrush yellowGradientBrush = new LinearGradientBrush();
+        private static LinearGradientBrush redGradientBrush = new LinearGradientBrush();
+        private static LinearGradientBrush greyGradientBrush = new LinearGradientBrush();
+
         private static Company headsetCompany;
         public static HeadsetIcons GetCurrentDeviceIcons()
         {
@@ -84,10 +95,22 @@ namespace HeadsetBatteryInfo
                 headsetCompany = Company.Unknown;
         }
 
+        public static LinearGradientBrush GetBlueGradient() => blueGradientBrush;
+        public static LinearGradientBrush GetGreenGradient() => greenGradientBrush;
+        public static LinearGradientBrush GetYellowGradient() => yellowGradientBrush;
+        public static LinearGradientBrush GetRedGradient() => redGradientBrush;
+        public static LinearGradientBrush GetGreyGradient() => greyGradientBrush;
+        public static SolidColorBrush GetBlueSolid() => blueSolid;
+        public static SolidColorBrush GetGreenSolid() => greenSolid;
+        public static SolidColorBrush GetYellowSolid() => yellowSolid;
+        public static SolidColorBrush GetRedSolid() => redSolid;
+        public static SolidColorBrush GetGreySolid() => greySolid;
+
         public static void Init()
         {
             InitDefaultIcons();
             InitPicoIcons();
+            InitGradient();
         }
 
         private static void InitDefaultIcons()
@@ -106,7 +129,6 @@ namespace HeadsetBatteryInfo
 
             PaintIcons(ref Unknown, icons);
         }
-
         private static void InitPicoIcons()
         {
             CompanyImages icons = new CompanyImages();
@@ -119,6 +141,53 @@ namespace HeadsetBatteryInfo
             icons.rightControllerChargingIcon = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/pico/right_controller_charging.png")) as BitmapSource;
 
             PaintIcons(ref Pico, icons);
+        }
+        private static void InitGradient()
+        {
+            blueSolid.Color = Color.FromRgb(55, 152, 231);
+            blueGradientBrush = new LinearGradientBrush();
+            {
+                GradientStop stop1 = new GradientStop(Color.FromRgb(34, 94, 206), 0);
+                GradientStop stop2 = new GradientStop(Color.FromRgb(55, 152, 231), 1);
+                blueGradientBrush.GradientStops.Add(stop1);
+                blueGradientBrush.GradientStops.Add(stop2);
+            }
+
+            greenSolid.Color = Color.FromRgb(76, 199, 48);
+            greenGradientBrush = new LinearGradientBrush();
+            {
+                GradientStop stop1 = new GradientStop(Color.FromRgb(24, 178, 79), 0);
+                GradientStop stop2 = new GradientStop(Color.FromRgb(76, 199, 48), 1);
+                greenGradientBrush.GradientStops.Add(stop1);
+                greenGradientBrush.GradientStops.Add(stop2);
+            }
+
+            yellowSolid.Color = Color.FromRgb(199, 193, 48);
+            yellowGradientBrush = new LinearGradientBrush();
+            {
+                GradientStop stop1 = new GradientStop(Color.FromRgb(178, 172, 24), 0);
+                GradientStop stop2 = new GradientStop(Color.FromRgb(199, 193, 48), 1);
+                yellowGradientBrush.GradientStops.Add(stop1);
+                yellowGradientBrush.GradientStops.Add(stop2);
+            }
+
+            redSolid.Color = Color.FromRgb(199, 76, 48);
+            redGradientBrush = new LinearGradientBrush();
+            {
+                GradientStop stop1 = new GradientStop(Color.FromRgb(178, 24, 79), 0);
+                GradientStop stop2 = new GradientStop(Color.FromRgb(199, 76, 48), 1);
+                redGradientBrush.GradientStops.Add(stop1);
+                redGradientBrush.GradientStops.Add(stop2);
+            }
+
+            greySolid.Color = Color.FromRgb(100, 100, 100);
+            greyGradientBrush = new LinearGradientBrush();
+            {
+                GradientStop stop1 = new GradientStop(Color.FromRgb(150, 150, 150), 0);
+                GradientStop stop2 = new GradientStop(Color.FromRgb(100, 100, 100), 1);
+                greyGradientBrush.GradientStops.Add(stop1);
+                greyGradientBrush.GradientStops.Add(stop2);
+            }
         }
 
         private static void PaintIcons(ref HeadsetIcons headsetIcons, CompanyImages icons)

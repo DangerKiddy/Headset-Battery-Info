@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Markup;
 
 namespace HeadsetBatteryInfo
 {
@@ -14,6 +12,8 @@ namespace HeadsetBatteryInfo
         private const int headsetPort = 28092;
         private const int vrcSendPort = 9000;
 
+        public const string vrcControllerLeftBatteryLvlAddress = "/avatar/parameters/controllerLeftBatteryLevel";
+        public const string vrcControllerRightBatteryLvlAddress = "/avatar/parameters/controllerRightBatteryLevel";
         public const string vrcHeadsetBatteryLvlAddress = "/avatar/parameters/headsetBatteryLevel";
         public const string vrcHeadsetBatteryStateAddress = "/avatar/parameters/isHeadsetCharging";
 

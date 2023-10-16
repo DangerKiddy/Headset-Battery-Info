@@ -2,31 +2,44 @@
 using System.Media;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Shapes;
 
 namespace HeadsetBatteryInfo
 {
     public partial class MainWindow : Window
     {
         public static MainWindow Instance { get; private set; }
+        private bool useStreamingApp = true;
 
         public MainWindow()
         {
+            Instance = this;
             InitializeComponent();
+
+            ControllerLeftBackground.Fill = DeviceIcons.GetGreyGradient();
+            ControllerLeftDropDown.Background = DeviceIcons.GetGreyGradient();
+            ControllerLeftText.Text = "Unknown";
+            ControllerLeftText.Foreground = DeviceIcons.GetGreySolid();
+
+            ControllerLeftProgress.Width = 0;
+
+            ControllerRightBackground.Fill = DeviceIcons.GetGreyGradient();
+            ControllerRightDropDown.Background = DeviceIcons.GetGreyGradient();
+            ControllerRightText.Text = "Unknown";
+            ControllerRightText.Foreground = DeviceIcons.GetGreySolid();
+
+            ControllerRightProgress.Width = 0;
 
             CompanyLogo.Opacity = 0;
             Headset.Opacity = 0;
             ControllerLeft.Opacity = 0;
             ControllerRight.Opacity = 0;
 
-            Instance = this;
-
             var showAnim = new DoubleAnimation();
             showAnim.From = 0;
             showAnim.To = 1;
             showAnim.Duration = TimeSpan.FromMilliseconds(1000);
-
             StatusText.BeginAnimation(OpacityProperty, showAnim);
 
             bool isSuccess = OSC.Init();
@@ -39,6 +52,115 @@ namespace HeadsetBatteryInfo
 
             DeviceIcons.Init();
 
+            if (useStreamingApp)
+                InitStreamingAppListener();
+            else
+                InitHeadsetListener();
+        }
+
+        private static void UpdateDeviceUi(DeviceType device, int level, bool isCharging)
+        {
+            Rectangle progressBar = default;
+            Rectangle background = default;
+            System.Windows.Controls.Button dropdown = default;
+            System.Windows.Controls.TextBlock text = default;
+
+            switch (device)
+            {
+                case DeviceType.Headset:
+                    progressBar = Instance.HeadsetProgress;
+                    background = Instance.HeadsetBackground;
+                    dropdown = Instance.HeadsetDropDown;
+                    text = Instance.HeadsetText;
+
+                    break;
+
+                case DeviceType.ControllerLeft:
+                    progressBar = Instance.ControllerLeftProgress;
+                    background = Instance.ControllerLeftBackground;
+                    dropdown = Instance.ControllerLeftDropDown;
+                    text = Instance.ControllerLeftText;
+
+                    break;
+
+                case DeviceType.ControllerRight:
+                    progressBar = Instance.ControllerRightProgress;
+                    background = Instance.ControllerRightBackground;
+                    dropdown = Instance.ControllerRightDropDown;
+                    text = Instance.ControllerRightText;
+
+                    break;
+            }
+
+            void SetColors(System.Windows.Media.LinearGradientBrush gradient, System.Windows.Media.SolidColorBrush solid)
+            {
+                System.Windows.Media.LinearGradientBrush useColor = gradient;
+                if (!isCharging)
+                    useColor = gradient;
+                else
+                    useColor = DeviceIcons.GetBlueGradient();
+
+                background.Fill = useColor;
+                dropdown.Background = useColor;
+                text.Foreground = useColor;
+
+                progressBar.Fill = solid;
+            }
+
+            if (level > 50)
+            {
+                SetColors(DeviceIcons.GetGreenGradient(), DeviceIcons.GetGreenSolid());
+            }
+            else if (level > 25)
+            {
+                SetColors(DeviceIcons.GetYellowGradient(), DeviceIcons.GetYellowSolid());
+            }
+            else
+            {
+                SetColors(DeviceIcons.GetRedGradient(), DeviceIcons.GetRedSolid());
+            }
+        }
+
+        public static void SetDeviceBatteryLevel(DeviceType device, int level, bool isCharging)
+        {
+            string str = (isCharging ? "Charge " : "") + level + "%";
+            float level01 = level / 100f;
+
+            switch (device)
+            {
+                case DeviceType.Headset:
+                    Instance.HeadsetText.Text = str;
+                    Instance.HeadsetProgress.Width = 96 * level01;
+
+                    break;
+
+                case DeviceType.ControllerLeft:
+                    Instance.ControllerLeftText.Text = str;
+                    Instance.ControllerLeftProgress.Width = 96 * level01;
+
+                    break;
+
+                case DeviceType.ControllerRight:
+                    Instance.ControllerRightText.Text = str;
+                    Instance.ControllerRightProgress.Width = 96 * level01;
+
+                    break;
+            }
+
+            UpdateDeviceUi(device, level, isCharging);
+            Instance.ConfirmHeadsetPair();
+        }
+
+        private void InitStreamingAppListener()
+        {
+            SetStatusText("Waiting for streaming app...");
+
+            StreamingAssistant.Init();
+            StreamingAssistant.StartListening();
+        }
+
+        private void InitHeadsetListener()
+        {
             SetStatusText("Waiting for headset...");
 
             OSC.AddReceiveHeadsetCallback(OnOSCReceiveHeadset);
@@ -54,40 +176,26 @@ namespace HeadsetBatteryInfo
             SetStatusText("Received headset, confirming...");
         }
 
-        private void OnReceiveCompanyName(string company)
+        public void OnReceiveCompanyName(string company)
         {
             ConfirmHeadsetPair();
 
             DeviceIcons.SetCompany(company);
         }
 
-        private void OnReceiveBatteryLevel(int level, DeviceType device)
+        public void OnReceiveBatteryLevel(int level, DeviceType device)
         {
-            ConfirmHeadsetPair();
-
             BatteryInfoReceiver.OnReceiveBatteryLevel(level, device);
         }
 
-        private void OnReceiveBatteryState(bool isCharging, DeviceType device)
+        public void OnReceiveBatteryState(bool isCharging, DeviceType device)
         {
-            ConfirmHeadsetPair();
-
             BatteryInfoReceiver.OnReceiveBatteryState(isCharging, device);
         }
 
         private void SetStatusText(string newStatus)
         {
             StatusText.Text = newStatus;
-        }
-
-        internal static void ChangeHeadsetIcon(ImageSource icon)
-        {
-            Instance.HeadsetIcon.Source = icon;
-        }
-
-        internal static void SetHeadsetText(string txt)
-        {
-            Instance.HeadsetText.Text = txt;
         }
 
         bool confirmedHeadsetPair = false;
@@ -125,8 +233,8 @@ namespace HeadsetBatteryInfo
 
             CompanyLogo.BeginAnimation(OpacityProperty, showAnim);
             Headset.BeginAnimation(OpacityProperty, showAnim);
-            //ControllerLeft.BeginAnimation(OpacityProperty, showAnim);
-            //ControllerRight.BeginAnimation(OpacityProperty, showAnim);
+            ControllerLeft.BeginAnimation(OpacityProperty, showAnim);
+            ControllerRight.BeginAnimation(OpacityProperty, showAnim);
         }
 
         private static SoundPlayer sound;

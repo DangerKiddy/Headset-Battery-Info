@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:HeadsetBatteryInfo"
         mc:Ignorable="d"
-        Title="Headset Battery Info" Height="211" Width="381" ResizeMode="NoResize" WindowStyle="None"
+        Title="Headset Battery Info" Height="105" Width="365" ResizeMode="NoResize" WindowStyle="None"
         MouseDown="Window_MouseDown">
     <Window.Background>
         <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
@@ -127,46 +127,261 @@
                     </Style>
                 </Button.Style>
             </Button>
+            <Image x:Name="CompanyLogo" HorizontalAlignment="Left" Height="21" VerticalAlignment="Top" Width="21" Source="/Assets/Images/pico/logo.png" Margin="-7,-7,0,0" Panel.ZIndex="1"/>
 
             <Grid x:Name="MainGrid" Margin="0,19,0,0">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="47*"/>
-                    <ColumnDefinition Width="134*"/>
-                    <ColumnDefinition Width="181*"/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
 
-                <Grid x:Name="DevicesGrid" Grid.Column="1" Grid.ColumnSpan="2" Margin="133,0,0,0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
+                <!--Left Controller-->
+                <Border x:Name="ControllerLeft" Grid.Column="0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="41*"/>
+                            <RowDefinition Height="19*"/>
+                            <RowDefinition Height="8*"/>
+                        </Grid.RowDefinitions>
 
-                    <Border x:Name="Headset" Grid.Row="0">
-                        <Grid>
-                            <Image x:Name="HeadsetIcon" Width="57" Stretch="Fill" Canvas.Left="0" Height="57" HorizontalAlignment="Left" VerticalAlignment="Center" Source="/Assets/Images/pico/headset.png"/>
-                            <TextBlock x:Name="HeadsetText" Text="100%" Canvas.Left="58" Canvas.Top="13" HorizontalAlignment="Center" Foreground="White" FontSize="24" VerticalAlignment="Center"/>
-                        </Grid>
-                    </Border>
+                        <Border HorizontalAlignment="Center" Grid.RowSpan="1" Width="62">
+                            <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
 
-                    <Border x:Name="ControllerLeft" Grid.Row="1">
-                        <Grid>
-                            <Image x:Name="ControllerLeftIcon" Width="57" Source="/Assets/Images/pico/left_controller.png" Stretch="Fill" Canvas.Left="0" Height="57" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                            <TextBlock x:Name="ControllerLeftText" Text="100%" Canvas.Left="58" Canvas.Top="13" HorizontalAlignment="Center" Foreground="White" FontSize="24" VerticalAlignment="Center"/>
-                        </Grid>
-                    </Border>
+                                <Image x:Name="ControllerLeftIcon" Width="39" Stretch="Fill" Height="40" HorizontalAlignment="Left" VerticalAlignment="Center" Source="/Assets/Images/pico/left_controller.png" Panel.ZIndex="1"/>
+                                <Rectangle x:Name="ControllerLeftBackground" HorizontalAlignment="Left" Height="40" Stroke="Black" VerticalAlignment="Center" Width="39" StrokeThickness="0">
+                                    <Rectangle.Fill>
+                                        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                            <LinearGradientBrush.RelativeTransform>
+                                                <TransformGroup>
+                                                    <ScaleTransform CenterY="0.5" CenterX="0.5"/>
+                                                    <SkewTransform CenterX="0.5" CenterY="0.5"/>
+                                                    <RotateTransform CenterX="0.5" CenterY="0.5" Angle="-90"/>
+                                                    <TranslateTransform X="0"/>
+                                                </TransformGroup>
+                                            </LinearGradientBrush.RelativeTransform>
+                                            <GradientStop Color="#FF18B24F" Offset="1"/>
+                                            <GradientStop Color="#FF4CC730" Offset="0"/>
+                                        </LinearGradientBrush>
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                                <Button
+                                    x:Name="ControllerLeftDropDown"
+                                    Width="18" Height="40"
+                                    BorderThickness="0,0,0,0" Margin="42,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" Cursor="Hand">
+                                    <Button.Background>
+                                        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                            <LinearGradientBrush.RelativeTransform>
+                                                <TransformGroup>
+                                                    <ScaleTransform CenterY="0.5" CenterX="0.5"/>
+                                                    <SkewTransform CenterX="0.5" CenterY="0.5"/>
+                                                    <RotateTransform Angle="-90" CenterX="0.5" CenterY="0.5"/>
+                                                    <TranslateTransform/>
+                                                </TransformGroup>
+                                            </LinearGradientBrush.RelativeTransform>
+                                            <GradientStop Color="#FF4CC730" Offset="0"/>
+                                            <GradientStop Color="#FF18B24F" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Button.Background>
+                                    <Grid>
+                                        <Polygon Points="0,0 10,0 5,4" Fill="White"/>
+                                    </Grid>
+                                </Button>
 
-                    <Border x:Name="ControllerRight" Grid.Row="2">
-                        <Grid>
-                            <Image x:Name="ControllerRightIcon" Width="57" Source="/Assets/Images/pico/right_controller.png" Stretch="Fill" Canvas.Left="0" Height="57" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                            <TextBlock x:Name="ControllerRightText" Text="100%" Canvas.Left="58" Canvas.Top="13" HorizontalAlignment="Center" Foreground="White" FontSize="24" VerticalAlignment="Center"/>
-                        </Grid>
-                    </Border>
-                </Grid>
+                            </Grid>
+                        </Border>
 
-                <Image x:Name="CompanyLogo" HorizontalAlignment="Left" Height="150" VerticalAlignment="Center" Width="150" Source="/Assets/Images/pico/logo.png" Margin="10,0,0,0" Panel.ZIndex="1" Grid.ColumnSpan="2"/>
+                        <TextBlock x:Name="ControllerLeftText" Canvas.Left="58" Canvas.Top="13" Foreground="#FF4CC730" FontSize="14" VerticalAlignment="Center" FontWeight="Bold" Text="Charge 100%" HorizontalAlignment="Center" Height="20" Width="86" Grid.Row="1" TextAlignment="Center"/>
+
+                        <Border Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" Height="8" Width="96">
+                            <Grid>
+                                <Rectangle HorizontalAlignment="Center" Height="7" Stroke="Black" VerticalAlignment="Center" Width="96" StrokeThickness="0" Grid.Row="2" Fill="#FF525A66"/>
+                                <Rectangle x:Name="ControllerLeftProgress" HorizontalAlignment="Left" Height="7" Stroke="Black" VerticalAlignment="Center" Width="48" StrokeThickness="0" Grid.Row="2" Fill="#FF4CC730"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!--Headset-->
+                <Border x:Name="Headset" Grid.Column="1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="41*"/>
+                            <RowDefinition Height="19*"/>
+                            <RowDefinition Height="8*"/>
+                        </Grid.RowDefinitions>
+
+                        <Border HorizontalAlignment="Center" Grid.RowSpan="1" Width="62">
+                            <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+
+                                <Image x:Name="HeadsetIcon" Width="39" Stretch="Fill" Height="40" HorizontalAlignment="Left" VerticalAlignment="Center" Source="/Assets/Images/pico/headset.png" Panel.ZIndex="1"/>
+                                <Rectangle x:Name="HeadsetBackground" HorizontalAlignment="Left" Height="40" Stroke="Black" VerticalAlignment="Center" Width="39" StrokeThickness="0">
+                                    <Rectangle.Fill>
+                                        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                            <LinearGradientBrush.RelativeTransform>
+                                                <TransformGroup>
+                                                    <ScaleTransform CenterY="0.5" CenterX="0.5"/>
+                                                    <SkewTransform CenterX="0.5" CenterY="0.5"/>
+                                                    <RotateTransform CenterX="0.5" CenterY="0.5" Angle="-90"/>
+                                                    <TranslateTransform X="0"/>
+                                                </TransformGroup>
+                                            </LinearGradientBrush.RelativeTransform>
+                                            <GradientStop Color="#FF18B24F" Offset="1"/>
+                                            <GradientStop Color="#FF4CC730" Offset="0"/>
+                                        </LinearGradientBrush>
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                                <Button x:Name="HeadsetDropDown"
+                                    Width="18" Height="40"
+                                    BorderThickness="0,0,0,0" Margin="42,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" Cursor="Hand">
+                                    <Button.Background>
+                                        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                            <LinearGradientBrush.RelativeTransform>
+                                                <TransformGroup>
+                                                    <ScaleTransform CenterY="0.5" CenterX="0.5"/>
+                                                    <SkewTransform CenterX="0.5" CenterY="0.5"/>
+                                                    <RotateTransform Angle="-90" CenterX="0.5" CenterY="0.5"/>
+                                                    <TranslateTransform/>
+                                                </TransformGroup>
+                                            </LinearGradientBrush.RelativeTransform>
+                                            <GradientStop Color="#FF4CC730" Offset="0"/>
+                                            <GradientStop Color="#FF18B24F" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Button.Background>
+                                    <Grid>
+                                        <Polygon Points="0,0 10,0 5,4" Fill="White"/>
+                                    </Grid>
+                                </Button>
+
+                            </Grid>
+                        </Border>
+
+                        <TextBlock x:Name="HeadsetText" Canvas.Left="58" Canvas.Top="13" Foreground="#FF4CC730" FontSize="14" VerticalAlignment="Center" FontWeight="Bold" Text="Charge 100%" HorizontalAlignment="Center" Height="20" Width="86" Grid.Row="1" TextAlignment="Center"/>
+
+                        <Border Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" Height="8" Width="96">
+                            <Grid>
+                                <Rectangle HorizontalAlignment="Center" Height="7" Stroke="Black" VerticalAlignment="Center" Width="96" StrokeThickness="0" Grid.Row="2" Fill="#FF525A66"/>
+                                <Rectangle x:Name="HeadsetProgress" HorizontalAlignment="Left" Height="7" Stroke="Black" VerticalAlignment="Center" Width="48" StrokeThickness="0" Grid.Row="2" Fill="#FF4CC730"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!--Right Controller-->
+                <Border x:Name="ControllerRight" Grid.Column="2">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="41*"/>
+                            <RowDefinition Height="19*"/>
+                            <RowDefinition Height="8*"/>
+                        </Grid.RowDefinitions>
+
+                        <Border HorizontalAlignment="Center" Grid.RowSpan="1" Width="62">
+                            <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+
+                                <Image x:Name="ControllerRightIcon" Width="39" Stretch="Fill" Height="40" HorizontalAlignment="Left" VerticalAlignment="Center" Source="/Assets/Images/pico/right_controller.png" Panel.ZIndex="1"/>
+                                <Rectangle x:Name="ControllerRightBackground" HorizontalAlignment="Left" Height="40" Stroke="Black" VerticalAlignment="Center" Width="39" StrokeThickness="0">
+                                    <Rectangle.Fill>
+                                        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                            <LinearGradientBrush.RelativeTransform>
+                                                <TransformGroup>
+                                                    <ScaleTransform CenterY="0.5" CenterX="0.5"/>
+                                                    <SkewTransform CenterX="0.5" CenterY="0.5"/>
+                                                    <RotateTransform CenterX="0.5" CenterY="0.5" Angle="-90"/>
+                                                    <TranslateTransform X="0"/>
+                                                </TransformGroup>
+                                            </LinearGradientBrush.RelativeTransform>
+                                            <GradientStop Color="#FF18B24F" Offset="1"/>
+                                            <GradientStop Color="#FF4CC730" Offset="0"/>
+                                        </LinearGradientBrush>
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                                <Button
+                                    x:Name="ControllerRightDropDown"
+                                    Width="18" Height="40"
+                                    BorderThickness="0,0,0,0" Margin="42,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" Cursor="Hand">
+                                    <Button.Background>
+                                        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                            <LinearGradientBrush.RelativeTransform>
+                                                <TransformGroup>
+                                                    <ScaleTransform CenterY="0.5" CenterX="0.5"/>
+                                                    <SkewTransform CenterX="0.5" CenterY="0.5"/>
+                                                    <RotateTransform Angle="-90" CenterX="0.5" CenterY="0.5"/>
+                                                    <TranslateTransform/>
+                                                </TransformGroup>
+                                            </LinearGradientBrush.RelativeTransform>
+                                            <GradientStop Color="#FF4CC730" Offset="0"/>
+                                            <GradientStop Color="#FF18B24F" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Button.Background>
+                                    <Grid>
+                                        <Polygon Points="0,0 10,0 5,4" Fill="White"/>
+                                    </Grid>
+                                </Button>
+
+                            </Grid>
+                        </Border>
+
+                        <TextBlock x:Name="ControllerRightText" Canvas.Left="58" Canvas.Top="13" Foreground="#FF4CC730" FontSize="14" VerticalAlignment="Center" FontWeight="Bold" Text="Charge 100%" HorizontalAlignment="Center" Height="20" Width="86" Grid.Row="1" TextAlignment="Center"/>
+
+                        <Border Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" Height="8" Width="96">
+                            <Grid>
+                                <Rectangle HorizontalAlignment="Center" Height="7" Stroke="Black" VerticalAlignment="Center" Width="96" StrokeThickness="0" Grid.Row="2" Fill="#FF525A66"/>
+                                <Rectangle x:Name="ControllerRightProgress" HorizontalAlignment="Left" Height="7" Stroke="Black" VerticalAlignment="Center" Width="48" StrokeThickness="0" Grid.Row="2" Fill="#FF4CC730"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!--
+                <Border x:Name="ControllerLeft" Grid.ColumnSpan="3" Margin="120,0,120,0">
+                    <Grid>
+                        <Image x:Name="ControllerLeftIcon" Width="57" Source="/Assets/Images/pico/left_controller.png" Stretch="Fill" Canvas.Left="0" Height="57" HorizontalAlignment="Left" VerticalAlignment="Center" Panel.ZIndex="1"/>
+                        <TextBlock x:Name="ControllerLeftText" Text="100%" Canvas.Left="58" Canvas.Top="13" HorizontalAlignment="Center" Foreground="White" FontSize="24" VerticalAlignment="Center"/>
+                        <Rectangle x:Name="ControllerLeftBackground_Copy" HorizontalAlignment="Left" Height="57" Stroke="Black" VerticalAlignment="Center" Width="57" StrokeThickness="0">
+                            <Rectangle.Fill>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <LinearGradientBrush.RelativeTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform CenterY="0.5" CenterX="0.5"/>
+                                            <SkewTransform CenterX="0.5" CenterY="0.5"/>
+                                            <RotateTransform CenterX="0.5" CenterY="0.5" Angle="-90"/>
+                                            <TranslateTransform X="0"/>
+                                        </TransformGroup>
+                                    </LinearGradientBrush.RelativeTransform>
+                                    <GradientStop Color="#FF18B24F" Offset="1"/>
+                                    <GradientStop Color="#FF4CC730" Offset="0"/>
+                                </LinearGradientBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </Grid>
+                </Border>
+
+                <Border x:Name="ControllerRight" Grid.Column="2">
+                    <Grid>
+                        <Image x:Name="ControllerRightIcon" Width="57" Source="/Assets/Images/pico/right_controller.png" Stretch="Fill" Canvas.Left="0" Height="57" HorizontalAlignment="Left" VerticalAlignment="Center" Panel.ZIndex="1"/>
+                        <TextBlock x:Name="ControllerRightText" Text="100%" Canvas.Left="58" Canvas.Top="13" HorizontalAlignment="Center" Foreground="White" FontSize="24" VerticalAlignment="Center"/>
+                        <Rectangle x:Name="ControllerRightBackground_Copy" HorizontalAlignment="Left" Height="57" Stroke="Black" VerticalAlignment="Center" Width="57" StrokeThickness="0">
+                            <Rectangle.Fill>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <LinearGradientBrush.RelativeTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform CenterY="0.5" CenterX="0.5"/>
+                                            <SkewTransform CenterX="0.5" CenterY="0.5"/>
+                                            <RotateTransform CenterX="0.5" CenterY="0.5" Angle="-90"/>
+                                            <TranslateTransform X="0"/>
+                                        </TransformGroup>
+                                    </LinearGradientBrush.RelativeTransform>
+                                    <GradientStop Color="#FF18B24F" Offset="1"/>
+                                    <GradientStop Color="#FF4CC730" Offset="0"/>
+                                </LinearGradientBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </Grid>
+                </Border>
+                -->
             </Grid>
-            <TextBlock x:Name="StatusText" Text="Waiting for headset..." Foreground="White" FontSize="14" Panel.ZIndex="10" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" Opacity="0"/>
+            <TextBlock x:Name="StatusText" Text="Waiting for headset..." Foreground="White" FontSize="14" Panel.ZIndex="10" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" Opacity="0" IsHitTestVisible="False"/>
         </Grid>
     </Border>
 </Window>

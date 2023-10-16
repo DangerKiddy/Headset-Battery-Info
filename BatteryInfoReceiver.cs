@@ -14,10 +14,12 @@ namespace HeadsetBatteryInfo
                     break;
 
                 case DeviceType.ControllerLeft:
+                    OnControllerLeftBatteryLevelChanged(level);
 
                     break;
 
                 case DeviceType.ControllerRight:
+                    OnControllerRightBatteryLevelChanged(level);
 
                     break;
 
@@ -67,27 +69,40 @@ namespace HeadsetBatteryInfo
         public static void OnHeadsetBatteryLevelChanged(int level)
         {
             currentHeadsetLevel = level;
-            MainWindow.SetHeadsetText(level + "%");
+            MainWindow.SetDeviceBatteryLevel(DeviceType.Headset, currentHeadsetLevel, isHeadsetCharging);
 
             DeviceIcons.HeadsetIcons deviceIcons = DeviceIcons.GetCurrentDeviceIcons();
             DeviceIcons.Icons icons = deviceIcons.headset;
             if (isHeadsetCharging)
                 icons = deviceIcons.headsetCharging;
 
-            if (level > 50)
-            {
-                MainWindow.ChangeHeadsetIcon(icons.highBattery);
-            }
-            else if (level > 25)
-            {
-                MainWindow.ChangeHeadsetIcon(icons.mediumBattery);
-            }
-            else
-            {
-                MainWindow.ChangeHeadsetIcon(icons.lowBattery);
-            }
-
             OSC.SendFloatToVRC(OSC.vrcHeadsetBatteryLvlAddress, currentHeadsetLevel / 100f);
+        }
+
+        private static int currentControllerLeftLevel = 100;
+        private static bool isControllerLeftCharging = false;
+        public static void OnControllerLeftBatteryLevelChanged(int level)
+        {
+            currentControllerLeftLevel = level;
+            MainWindow.SetDeviceBatteryLevel(DeviceType.ControllerLeft, currentControllerLeftLevel, isControllerLeftCharging);
+
+            DeviceIcons.HeadsetIcons deviceIcons = DeviceIcons.GetCurrentDeviceIcons();
+            DeviceIcons.Icons icons = deviceIcons.leftController;
+
+            OSC.SendFloatToVRC(OSC.vrcControllerLeftBatteryLvlAddress, currentControllerLeftLevel / 100f);
+        }
+
+        private static int currentControllerRightLevel = 100;
+        private static bool isControllerRightCharging = false;
+        public static void OnControllerRightBatteryLevelChanged(int level)
+        {
+            currentControllerRightLevel = level;
+            MainWindow.SetDeviceBatteryLevel(DeviceType.ControllerRight, currentControllerRightLevel, isControllerRightCharging);
+
+            DeviceIcons.HeadsetIcons deviceIcons = DeviceIcons.GetCurrentDeviceIcons();
+            DeviceIcons.Icons icons = deviceIcons.rightController;
+
+            OSC.SendFloatToVRC(OSC.vrcControllerRightBatteryLvlAddress, currentControllerRightLevel / 100f);
         }
     }
 }
