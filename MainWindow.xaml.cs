@@ -16,25 +16,7 @@ namespace HeadsetBatteryInfo
         {
             Instance = this;
             InitializeComponent();
-
-            ControllerLeftBackground.Fill = DeviceIcons.GetGreyGradient();
-            ControllerLeftDropDown.Background = DeviceIcons.GetGreyGradient();
-            ControllerLeftText.Text = "Unknown";
-            ControllerLeftText.Foreground = DeviceIcons.GetGreySolid();
-
-            ControllerLeftProgress.Width = 0;
-
-            ControllerRightBackground.Fill = DeviceIcons.GetGreyGradient();
-            ControllerRightDropDown.Background = DeviceIcons.GetGreyGradient();
-            ControllerRightText.Text = "Unknown";
-            ControllerRightText.Foreground = DeviceIcons.GetGreySolid();
-
-            ControllerRightProgress.Width = 0;
-
-            CompanyLogo.Opacity = 0;
-            Headset.Opacity = 0;
-            ControllerLeft.Opacity = 0;
-            ControllerRight.Opacity = 0;
+            InitDefaultUiValues();
 
             var showAnim = new DoubleAnimation();
             showAnim.From = 0;
@@ -56,6 +38,28 @@ namespace HeadsetBatteryInfo
                 InitStreamingAppListener();
             else
                 InitHeadsetListener();
+        }
+
+        private void InitDefaultUiValues()
+        {
+            ControllerLeftBackground.Fill = DeviceIcons.GetGreyGradient();
+            ControllerLeftDropDown.Background = DeviceIcons.GetGreyGradient();
+            ControllerLeftText.Text = "Unknown";
+            ControllerLeftText.Foreground = DeviceIcons.GetGreySolid();
+
+            ControllerLeftProgress.Width = 0;
+
+            ControllerRightBackground.Fill = DeviceIcons.GetGreyGradient();
+            ControllerRightDropDown.Background = DeviceIcons.GetGreyGradient();
+            ControllerRightText.Text = "Unknown";
+            ControllerRightText.Foreground = DeviceIcons.GetGreySolid();
+
+            ControllerRightProgress.Width = 0;
+
+            CompanyLogo.Opacity = 0;
+            Headset.Opacity = 0;
+            ControllerLeft.Opacity = 0;
+            ControllerRight.Opacity = 0;
         }
 
         private static void UpdateDeviceUi(DeviceType device, int level, bool isCharging)
@@ -123,6 +127,8 @@ namespace HeadsetBatteryInfo
 
         public static void SetDeviceBatteryLevel(DeviceType device, int level, bool isCharging)
         {
+            level = Math.Max(Math.Min(level, 100), 0);
+
             string str = (isCharging ? "Charge " : "") + level + "%";
             float level01 = level / 100f;
 
