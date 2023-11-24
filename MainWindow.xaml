@@ -7,6 +7,7 @@
         mc:Ignorable="d"
         Title="Headset Battery Info" Height="105" Width="365" ResizeMode="NoResize" WindowStyle="None"
         MouseDown="Window_MouseDown">
+    
     <Window.Background>
         <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
             <GradientStop Color="#FF212224" Offset="1"/>
@@ -116,6 +117,53 @@
                                                 Storyboard.TargetName="BackgroundRect"
                                                 Storyboard.TargetProperty="(Rectangle.Fill).(SolidColorBrush.Color)"
                                                 To="#003E3E3E" Duration="0:0:0.15" />
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </Trigger.ExitActions>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Style>
+            </Button>
+            <Button x:Name="SettingsButton" Click="SettingsButton_Click" Content="" HorizontalAlignment="Right" Margin="0,-6,93,0" VerticalAlignment="Top" Width="17" Height="17" BorderThickness="0,0,0,0" BorderBrush="{x:Null}" Background="{x:Null}">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Opacity" Value="1"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Border" Background="{TemplateBinding Background}">
+                                        <Grid>
+                                            <Rectangle x:Name="BackgroundImage">
+                                                <Rectangle.Fill>
+                                                    <ImageBrush ImageSource="/Assets/Images/cog.png" Opacity="0.75"/>
+                                                </Rectangle.Fill>
+                                            </Rectangle>
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Trigger.EnterActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation
+                                                            Storyboard.TargetName="BackgroundImage"
+                                                            Storyboard.TargetProperty="Opacity"
+                                                            To="0.25" Duration="0:0:0.1"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </Trigger.EnterActions>
+                                            <Trigger.ExitActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation
+                                                            Storyboard.TargetName="BackgroundImage"
+                                                            Storyboard.TargetProperty="Opacity"
+                                                            To="0.75" Duration="0:0:0.1"/>
                                                     </Storyboard>
                                                 </BeginStoryboard>
                                             </Trigger.ExitActions>

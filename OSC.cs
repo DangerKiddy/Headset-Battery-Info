@@ -17,10 +17,12 @@ namespace HeadsetBatteryInfo
         public const string vrcHeadsetBatteryLvlAddress = "/avatar/parameters/headsetBatteryLevel";
         public const string vrcHeadsetBatteryStateAddress = "/avatar/parameters/isHeadsetCharging";
 
+        private static bool isActive = false;
         private static UdpClient udp;
         public static bool Init()
         {
             bool isSuccess = false;
+            isActive = true;
 
             try
             {
@@ -31,6 +33,7 @@ namespace HeadsetBatteryInfo
             catch
             {
                 Console.WriteLine($"Failed to create listen socket! (Another app listening on {ipAddress}:{headsetPort} already?)");
+                isActive = false;
             }
 
             return isSuccess;
@@ -73,6 +76,9 @@ namespace HeadsetBatteryInfo
         {
             while (true)
             {
+                if (!isActive)
+                    break;
+
                 Receive();
 
                 await Task.Delay(TimeSpan.FromMilliseconds(100));
@@ -139,10 +145,7 @@ namespace HeadsetBatteryInfo
                     }
                 }
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
+            catch { } // udp was closed
         }
 
         private static void AlignStringBytes(ref string str)
@@ -343,6 +346,14 @@ namespace HeadsetBatteryInfo
 
             int val = BitConverter.ToInt32(bytes, 0);
             return val;
+        }
+
+        public static void Terminate()
+        {
+            isActive = false;
+            
+            udp.Dispose();
+            udp.Close();
         }
     }
 }

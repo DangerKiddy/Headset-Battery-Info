@@ -71,11 +71,6 @@ namespace HeadsetBatteryInfo
             currentHeadsetLevel = level;
             MainWindow.SetDeviceBatteryLevel(DeviceType.Headset, currentHeadsetLevel, isHeadsetCharging);
 
-            DeviceIcons.HeadsetIcons deviceIcons = DeviceIcons.GetCurrentDeviceIcons();
-            DeviceIcons.Icons icons = deviceIcons.headset;
-            if (isHeadsetCharging)
-                icons = deviceIcons.headsetCharging;
-
             OSC.SendFloatToVRC(OSC.vrcHeadsetBatteryLvlAddress, currentHeadsetLevel / 100f);
         }
 
@@ -86,9 +81,6 @@ namespace HeadsetBatteryInfo
             currentControllerLeftLevel = level;
             MainWindow.SetDeviceBatteryLevel(DeviceType.ControllerLeft, currentControllerLeftLevel, isControllerLeftCharging);
 
-            DeviceIcons.HeadsetIcons deviceIcons = DeviceIcons.GetCurrentDeviceIcons();
-            DeviceIcons.Icons icons = deviceIcons.leftController;
-
             OSC.SendFloatToVRC(OSC.vrcControllerLeftBatteryLvlAddress, currentControllerLeftLevel / 100f);
         }
 
@@ -98,9 +90,6 @@ namespace HeadsetBatteryInfo
         {
             currentControllerRightLevel = level;
             MainWindow.SetDeviceBatteryLevel(DeviceType.ControllerRight, currentControllerRightLevel, isControllerRightCharging);
-
-            DeviceIcons.HeadsetIcons deviceIcons = DeviceIcons.GetCurrentDeviceIcons();
-            DeviceIcons.Icons icons = deviceIcons.rightController;
 
             OSC.SendFloatToVRC(OSC.vrcControllerRightBatteryLvlAddress, currentControllerRightLevel / 100f);
         }

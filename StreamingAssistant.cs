@@ -17,6 +17,8 @@ namespace HeadsetBatteryInfo
         private static int headsetBatteryOffset = 0x64;
         private static int leftControllerBatteryOffset = 0x68;
         private static int rightControllerBatteryOffset = 0x6C;
+        
+        private static bool isActive = false;
 
         private enum ControllerBatteryLevel
         {
@@ -79,9 +81,14 @@ namespace HeadsetBatteryInfo
 
         public static async void Init()
         {
+            isActive = true;
+
             bool streamingAppFound = false;
             while (!streamingAppFound)
             {
+                if (!isActive)
+                    break;
+
                 var processes = Process.GetProcessesByName("Streaming Assistant");
 
                 if (processes.Length > 0)
@@ -117,16 +124,14 @@ namespace HeadsetBatteryInfo
         private static int ReadInt32(IntPtr addr)
         {
             byte[] results = new byte[4];
-            int read = 0;
-            ReadProcessMemory(streamingAssistantHandle, addr, results, results.Length, out read);
+            ReadProcessMemory(streamingAssistantHandle, addr, results, results.Length, out _);
 
             return BitConverter.ToInt32(results, 0);
         }
         private static long ReadInt64(IntPtr addr)
         {
             byte[] results = new byte[8];
-            int read = 0;
-            ReadProcessMemory(streamingAssistantHandle, addr, results, results.Length, out read);
+            ReadProcessMemory(streamingAssistantHandle, addr, results, results.Length, out _);
 
             return BitConverter.ToInt64(results, 0);
         }
@@ -169,6 +174,9 @@ namespace HeadsetBatteryInfo
         {
             while (true)
             {
+                if (!isActive)
+                    break;
+
                 // Not completely sure, but if not updating pointers every X calls then it breaks and reads all numbers zero
                 UpdateClientManagerPointer(THREADSTACK0);
 
@@ -186,6 +194,16 @@ namespace HeadsetBatteryInfo
 
                 await Task.Delay(TimeSpan.FromMilliseconds(3000));
             }
+        }
+
+        public static void Terminate()
+        {
+            streamingAssistant = null;
+            clientManagerPtr = IntPtr.Zero;
+            streamingAssistantHandle = IntPtr.Zero;
+            THREADSTACK0 = IntPtr.Zero;
+
+            isActive = false;
         }
     }
 }

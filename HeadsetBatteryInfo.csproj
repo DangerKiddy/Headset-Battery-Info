@@ -167,6 +167,7 @@
   <ItemGroup>
     <Content Include="Assets\Sounds\charging_stopped.wav" />
     <Content Include="Assets\threadstack.exe" />
+    <Resource Include="Assets\Images\cog.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
