@@ -128,35 +128,24 @@ namespace HeadsetBatteryInfo
             icons.leftControllerChargingIcon = controllerChargingIcon;
             icons.rightControllerChargingIcon = controllerChargingIcon;
 
-            //PaintIcons(ref Unknown, icons);
             Unknown.companyLogo = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/unknown/logo.png"));
         }
         private static void InitPicoIcons()
         {
-            //CompanyImages icons = new CompanyImages();
             Pico.headset = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/pico/headset.png")) as BitmapSource;
             Pico.leftController = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/pico/left_controller.png")) as BitmapSource;
             Pico.rightController = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/pico/right_controller.png")) as BitmapSource;
 
             Pico.headsetCharging = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/pico/headset_charging.png")) as BitmapSource;
-            //icons.leftControllerChargingIcon = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/pico/left_controller_charging.png")) as BitmapSource;
-            //icons.rightControllerChargingIcon = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/pico/right_controller_charging.png")) as BitmapSource;
-
-            //PaintIcons(ref Pico, icons);
             Pico.companyLogo = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/pico/logo.png"));
         }
         private static void InitMetaIcons()
         {
-            //CompanyImages icons = new CompanyImages();
             Meta.headset = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/meta/headset.png")) as BitmapSource;
             Meta.leftController = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/meta/left_controller.png")) as BitmapSource;
             Meta.rightController = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/meta/right_controller.png")) as BitmapSource;
 
             Meta.headsetCharging = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/meta/headset_charging.png")) as BitmapSource;
-            //Meta.leftControllerCharging = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/pico/left_controller_charging.png")) as BitmapSource;
-            //Meta.rightControllerCharging = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/pico/right_controller_charging.png")) as BitmapSource;
-
-            //PaintIcons(ref Meta, icons);
             Meta.companyLogo = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/meta/logo.png"));
         }
         private static void InitGradient()
@@ -207,26 +196,6 @@ namespace HeadsetBatteryInfo
             }
         }
 
-        private static void PaintIcons(ref HeadsetIcons headsetIcons, CompanyImages icons)
-        {
-            /*
-            headsetIcons.headset.highBattery = ChangeImageColor(icons.headsetIcon, highBattery);
-            headsetIcons.headset.mediumBattery = ChangeImageColor(icons.headsetIcon, mediumBattery);
-            headsetIcons.headset.lowBattery = ChangeImageColor(icons.headsetIcon, lowBattery);
-
-            headsetIcons.headsetCharging.highBattery = ChangeImageColor(icons.headsetChargingIcon, highBattery);
-            headsetIcons.headsetCharging.mediumBattery = ChangeImageColor(icons.headsetChargingIcon, mediumBattery);
-            headsetIcons.headsetCharging.lowBattery = ChangeImageColor(icons.headsetChargingIcon, lowBattery);
-
-            headsetIcons.leftController.highBattery = ChangeImageColor(icons.headsetIcon, highBattery);
-            headsetIcons.leftController.mediumBattery = ChangeImageColor(icons.headsetIcon, mediumBattery);
-            headsetIcons.leftController.lowBattery = ChangeImageColor(icons.headsetIcon, lowBattery);
-
-            headsetIcons.rightController.highBattery = ChangeImageColor(icons.headsetIcon, highBattery);
-            headsetIcons.rightController.mediumBattery = ChangeImageColor(icons.headsetIcon, mediumBattery);
-            headsetIcons.rightController.lowBattery = ChangeImageColor(icons.headsetIcon, lowBattery);
-            */
-        }
         private static ImageSource ConvertBitmapToImageSource(System.Drawing.Bitmap bitmap)
         {
             MemoryStream memoryStream = new MemoryStream();
