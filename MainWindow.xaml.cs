@@ -1,5 +1,7 @@
 ﻿using System;
+using System.IO;
 using System.Media;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -11,7 +13,6 @@ namespace HeadsetBatteryInfo
     public partial class MainWindow : Window
     {
         public static MainWindow Instance { get; private set; }
-        private bool useStreamingApp = true;
 
         public MainWindow()
         {
@@ -22,11 +23,31 @@ namespace HeadsetBatteryInfo
             ShowStatusText();
 
             DeviceIcons.Init();
+            bool isSuccess = OSC.Init(); // required for sending stuff to vrc
+            if (!isSuccess)
+            {
+                SetStatusText("Failed to init OSC!\nSomething else is listening to 28092 port?");
 
-            if (useStreamingApp)
+                return;
+            }
+            File.WriteAllText("log.txt", "");
+
+            Settings.Load();
+
+            HeadsetDropDown.IsEnabled = false;
+            ControllerLeftDropDown.IsEnabled = false;
+            ControllerRightDropDown.IsEnabled = false;
+
+            if (Settings.GetValue<bool>("useStreamingApp"))
                 InitStreamingAppListener();
             else
                 InitHeadsetListener();
+
+        }
+
+        public static void WriteLog(string message)
+        {
+            File.AppendAllText("log.txt", message);
         }
 
         private void InitDefaultUiValues()
@@ -180,14 +201,6 @@ namespace HeadsetBatteryInfo
         bool isCallbackInitialized = false;
         private void InitHeadsetListener()
         {
-            bool isSuccess = OSC.Init();
-            if (!isSuccess)
-            {
-                SetStatusText("Failed to init OSC!\nSomething else is listening to 28092 port?");
-
-                return;
-            }
-
             SetStatusText("Waiting for headset...");
 
             if (!isCallbackInitialized)
@@ -255,6 +268,10 @@ namespace HeadsetBatteryInfo
             if (!mainContentHidden)
                 return;
 
+            HeadsetDropDown.IsEnabled = true;
+            ControllerLeftDropDown.IsEnabled = true;
+            ControllerRightDropDown.IsEnabled = true;
+
             mainContentHidden = false;
 
             var showAnim = new DoubleAnimation();
@@ -272,6 +289,10 @@ namespace HeadsetBatteryInfo
         {
             if (mainContentHidden)
                 return;
+
+            HeadsetDropDown.IsEnabled = false;
+            ControllerLeftDropDown.IsEnabled = false;
+            ControllerRightDropDown.IsEnabled = false;
 
             mainContentHidden = true;
 
@@ -316,11 +337,15 @@ namespace HeadsetBatteryInfo
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
             var contextMenu = new ContextMenu();
-            
+
+            var useStreamingApp = Settings.GetValue<bool>(Settings.Setting_UseStreamingApp);
+
             var strAssist = new MenuItem();
             strAssist.Header = "(Pico) Use Streaming Assistant";
             strAssist.Click += (object _sender, RoutedEventArgs _e) =>
             {
+                Settings.SetValue(Settings.Setting_UseStreamingApp, true);
+
                 confirmedHeadsetPair = false;
                 ShowStatusText();
                 HideMainContent();
@@ -329,12 +354,15 @@ namespace HeadsetBatteryInfo
 
                 InitStreamingAppListener();
             };
+            strAssist.IsChecked = useStreamingApp;
             contextMenu.Items.Add(strAssist);
 
             var useApp = new MenuItem();
             useApp.Header = "(Any) Use Headset application";
             useApp.Click += (object _sender, RoutedEventArgs _e) =>
             {
+                Settings.SetValue(Settings.Setting_UseStreamingApp, false);
+
                 confirmedHeadsetPair = false;
                 ShowStatusText();
                 HideMainContent();
@@ -343,9 +371,38 @@ namespace HeadsetBatteryInfo
 
                 InitHeadsetListener();
             };
+            useApp.IsChecked = !useStreamingApp;
             contextMenu.Items.Add(useApp);
 
             contextMenu.IsOpen = true;  
+        }
+        private void HeadsetDropDown_Click(object sender, RoutedEventArgs e)
+        {
+            var contextMenu = new ContextMenu();
+
+            if (Settings.GetValue<bool>(Settings.Setting_UseStreamingApp))
+            {
+                var predictCharging = new MenuItem();
+                predictCharging.Header = "(SA) Predict charging state";
+                predictCharging.Click += (object _sender, RoutedEventArgs _e) =>
+                {
+                    Settings.SetValue(Settings.Setting_PredictHeadsetCharge, !Settings.GetValue<bool>(Settings.Setting_PredictHeadsetCharge));
+                };
+                predictCharging.IsChecked = Settings.GetValue<bool>(Settings.Setting_PredictHeadsetCharge);
+                
+                contextMenu.Items.Add(predictCharging);
+            }
+
+            var lowBattery = new MenuItem();
+            lowBattery.Header = "Notify on low battery";
+            lowBattery.Click += (object _sender, RoutedEventArgs _e) =>
+            {
+                Settings.SetValue(Settings.Setting_HeadsetNotifyLowBattery, !Settings.GetValue<bool>(Settings.Setting_HeadsetNotifyLowBattery, true));
+            };
+            lowBattery.IsChecked = Settings.GetValue<bool>(Settings.Setting_HeadsetNotifyLowBattery, true);
+            contextMenu.Items.Add(lowBattery);
+
+            contextMenu.IsOpen = true;
         }
     }
 }

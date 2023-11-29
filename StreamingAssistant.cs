@@ -8,6 +8,8 @@ namespace HeadsetBatteryInfo
 {
     internal class StreamingAssistant
     {
+        private static long batteryDischargeMaximumTime = 70000;
+
         private static Process streamingAssistant;
         private static IntPtr clientManagerPtr;
         private static IntPtr streamingAssistantHandle;
@@ -186,6 +188,9 @@ namespace HeadsetBatteryInfo
 
                     if (headsetBatteryLevel >= 0 && headsetBatteryLevel <= 100)
                     {
+                        if (Settings.GetValue<bool>(Settings.Setting_PredictHeadsetCharge))
+                            PredictChargeState(headsetBatteryLevel);
+
                         MainWindow.Instance.OnReceiveBatteryLevel(headsetBatteryLevel, DeviceType.Headset);
                         MainWindow.Instance.OnReceiveBatteryLevel(GetLeftControllerBattery(), DeviceType.ControllerLeft);
                         MainWindow.Instance.OnReceiveBatteryLevel(GetRightControllerBattery(), DeviceType.ControllerRight);
@@ -194,6 +199,47 @@ namespace HeadsetBatteryInfo
 
                 await Task.Delay(TimeSpan.FromMilliseconds(3000));
             }
+        }
+
+        private static long lastBatteryChange = 0;
+        private static int lastLevel = 0;
+        private static long lastTimeDifference = 0;
+        private static void PredictChargeState(int currentBatteryLevel)
+        {
+            var curTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            if (lastLevel != 0)
+            {
+                var timeSinceLastChange = curTime - lastBatteryChange;
+                if (lastLevel != currentBatteryLevel)
+                {
+                    var batteryLevelDifference = lastLevel - currentBatteryLevel;
+                    lastBatteryChange = curTime;
+
+                    lastTimeDifference = timeSinceLastChange;
+
+                    bool isCharging = IsCharging(timeSinceLastChange, batteryLevelDifference);
+
+                    MainWindow.WriteLog($"Time: {timeSinceLastChange}, Charge state: {isCharging}\n");
+                    MainWindow.Instance.OnReceiveBatteryState(isCharging, DeviceType.Headset);
+                }
+
+                if (lastTimeDifference != 0 && !BatteryInfoReceiver.IsHeadsetCharging() && IsCharging(timeSinceLastChange, 1))
+                {
+                    MainWindow.WriteLog($"Time: {timeSinceLastChange}, Charge state: {true}\n");
+                    MainWindow.Instance.OnReceiveBatteryState(true, DeviceType.Headset);
+                }
+            }
+            else
+            {
+                lastBatteryChange = curTime;
+            }
+
+            lastLevel = currentBatteryLevel;
+        }
+
+        private static bool IsCharging(long timeSinceLastChange, int batteryLevelDifference)
+        {
+            return timeSinceLastChange >= batteryDischargeMaximumTime || batteryLevelDifference <= 0;
         }
 
         public static void Terminate()

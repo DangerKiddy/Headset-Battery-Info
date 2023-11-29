@@ -26,7 +26,8 @@ namespace HeadsetBatteryInfo
 
             try
             {
-                udp = new UdpClient(headsetPort);
+                if (udp == null)
+                    udp = new UdpClient(headsetPort);
 
                 isSuccess = true;
             }
@@ -351,9 +352,6 @@ namespace HeadsetBatteryInfo
         public static void Terminate()
         {
             isActive = false;
-            
-            udp.Dispose();
-            udp.Close();
         }
     }
 }

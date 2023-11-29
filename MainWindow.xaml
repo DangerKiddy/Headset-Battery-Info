@@ -280,6 +280,7 @@
                                     </Rectangle.Fill>
                                 </Rectangle>
                                 <Button x:Name="HeadsetDropDown"
+                                    Click="HeadsetDropDown_Click"
                                     Width="18" Height="40"
                                     BorderThickness="0,0,0,0" Margin="42,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" Cursor="Hand">
                                     <Button.Background>
