@@ -1,9 +1,12 @@
-﻿using System;
+﻿using Microsoft.Toolkit.Uwp.Notifications;
+using System;
 
 namespace HeadsetBatteryInfo
 {
     internal static class BatteryInfoReceiver
     {
+        private static int lowBatteryPercent = 25; // if battery percent below this value then notify about it
+
         public static void OnReceiveBatteryLevel(int level, DeviceType device)
         {
             switch (device)
@@ -52,18 +55,23 @@ namespace HeadsetBatteryInfo
 
         private static int currentHeadsetLevel = 100;
         private static bool isHeadsetCharging = false;
+        private static bool previousHeadsetChargingState = false;
         public static void OnHeadsetBatteryStateChanged(bool isCharging)
         {
             isHeadsetCharging = isCharging;
 
             OnHeadsetBatteryLevelChanged(currentHeadsetLevel); // required for updating icon and letting vrc know about latest battery lvl
 
-            if (!isCharging && Settings.GetValue<bool>(Settings.Setting_HeadsetNotifyLowBattery, true))
+            if (!isCharging && Settings.GetValue<bool>(Settings.Setting_HeadsetNotifyStopCharging, true) && previousHeadsetChargingState != isCharging)
             {
                 MainWindow.PlayBatteryStateSound();
-            }
 
+                Overlay.SendNotification("Headset is not charging anymore!");
+            }
+            previousHeadsetChargingState = isCharging;
+            
             OSC.SendBoolToVRC(OSC.vrcHeadsetBatteryStateAddress, isHeadsetCharging);
+            Overlay.UpdateWristInfo(DeviceType.Headset, currentHeadsetLevel, isCharging);
         }
 
         public static bool IsHeadsetCharging()
@@ -71,12 +79,26 @@ namespace HeadsetBatteryInfo
             return isHeadsetCharging;
         }
 
+        private static bool notifiedAboutHeadsetLowBattery = false;
         public static void OnHeadsetBatteryLevelChanged(int level)
         {
             currentHeadsetLevel = level;
             MainWindow.SetDeviceBatteryLevel(DeviceType.Headset, currentHeadsetLevel, isHeadsetCharging);
 
+            if (level < lowBatteryPercent && Settings.GetValue<bool>(Settings.Setting_HeadsetNotifyLowBattery, true))
+            {
+                if (!notifiedAboutHeadsetLowBattery)
+                    NotifyLowBattery(DeviceType.Headset);
+
+                notifiedAboutHeadsetLowBattery = true;
+            }
+            else
+            {
+                notifiedAboutHeadsetLowBattery = false;
+            }
+
             OSC.SendFloatToVRC(OSC.vrcHeadsetBatteryLvlAddress, currentHeadsetLevel / 100f);
+            Overlay.UpdateWristInfo(DeviceType.Headset, level, IsHeadsetCharging());
         }
 
         private static int currentControllerLeftLevel = 100;
@@ -86,7 +108,10 @@ namespace HeadsetBatteryInfo
             currentControllerLeftLevel = level;
             MainWindow.SetDeviceBatteryLevel(DeviceType.ControllerLeft, currentControllerLeftLevel, isControllerLeftCharging);
 
+            CheckAndNotifyControllerLowBattery(level);
+
             OSC.SendFloatToVRC(OSC.vrcControllerLeftBatteryLvlAddress, currentControllerLeftLevel / 100f);
+            Overlay.UpdateWristInfo(DeviceType.ControllerLeft, level, false);
         }
 
         private static int currentControllerRightLevel = 100;
@@ -96,7 +121,33 @@ namespace HeadsetBatteryInfo
             currentControllerRightLevel = level;
             MainWindow.SetDeviceBatteryLevel(DeviceType.ControllerRight, currentControllerRightLevel, isControllerRightCharging);
 
+            CheckAndNotifyControllerLowBattery(level);
+
             OSC.SendFloatToVRC(OSC.vrcControllerRightBatteryLvlAddress, currentControllerRightLevel / 100f);
+            Overlay.UpdateWristInfo(DeviceType.ControllerRight, level, false);
+        }
+
+        private static bool notifiedAboutControllerLowBattery = false;
+        private static void CheckAndNotifyControllerLowBattery(int level)
+        {
+            if (level < lowBatteryPercent && Settings.GetValue<bool>(Settings.Setting_ControllersNotifyLowBattery, true))
+            {
+                if (!notifiedAboutControllerLowBattery)
+                    NotifyLowBattery(DeviceType.ControllerLeft);
+
+                notifiedAboutControllerLowBattery = true;
+            }
+            else
+            {
+                notifiedAboutControllerLowBattery = false;
+            }
+        }
+
+        private static void NotifyLowBattery(DeviceType device)
+        {
+            MainWindow.PlayBatteryStateSound();
+
+            Overlay.SendNotification(device == DeviceType.Headset ? "Headset has low battery!" : "Controller has low battery!");
         }
     }
 }

@@ -3,6 +3,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Interop;
+using System.Windows.Markup;
 
 namespace HeadsetBatteryInfo
 {
@@ -19,6 +21,9 @@ namespace HeadsetBatteryInfo
 
         private static bool isActive = false;
         private static UdpClient udp;
+
+        private static IPEndPoint headsetEndPoint;
+
         public static bool Init()
         {
             bool isSuccess = false;
@@ -71,6 +76,30 @@ namespace HeadsetBatteryInfo
         public static void StartListening()
         {
             Listen();
+
+            //Test();
+        }
+
+        private static async void Test()
+        {
+            while (true)
+            {
+                if (headsetEndPoint != null)
+                {
+                    var sendBack = "/requestBatteryInfo";
+                    AlignStringBytes(ref sendBack);
+
+                    sendBack += ",T";
+                    AlignStringBytes(ref sendBack);
+
+                    var buffer = Encoding.ASCII.GetBytes(sendBack);
+                    udp.Send(buffer, buffer.Length, headsetEndPoint);
+
+                    Console.WriteLine("Sent message to the headset");
+                }
+
+                await Task.Delay(1000);
+            }
         }
 
         private static async void Listen()
@@ -98,15 +127,11 @@ namespace HeadsetBatteryInfo
 
                 if (msg.success)
                 {
-                    foreach(byte b in data.Buffer)
-                    {
-                        Console.Write((char)b);
-                    }
-                    Console.WriteLine();
-
                     switch (msg.address)
                     {
                         case "/netLocalIpAddress":
+                            headsetEndPoint = new IPEndPoint(incomingIP.Address, headsetPort);
+
                             var sendBack = "/confirmAddress";
                             AlignStringBytes(ref sendBack);
 
@@ -118,7 +143,7 @@ namespace HeadsetBatteryInfo
                             AlignStringBytes(ref sendBack);
 
                             var buffer = Encoding.ASCII.GetBytes(sendBack);
-                            udp.Send(buffer, buffer.Length, new IPEndPoint(incomingIP.Address, headsetPort));
+                            udp.Send(buffer, buffer.Length, headsetEndPoint);
 
                             onReceiveHeadset();
 
@@ -146,7 +171,7 @@ namespace HeadsetBatteryInfo
                     }
                 }
             }
-            catch { } // udp was closed
+            catch {  } // udp was closed
         }
 
         private static void AlignStringBytes(ref string str)
@@ -155,6 +180,10 @@ namespace HeadsetBatteryInfo
             if (strLen % 4 != 0)
             {
                 strLen += 4 - (strLen % 4);
+            }
+            else
+            {
+                strLen += 4;
             }
 
             for (int i = str.Length; i < strLen; i++)
@@ -180,7 +209,7 @@ namespace HeadsetBatteryInfo
             finalBuffer[buffer.Length + 2] = bytes[1];
             finalBuffer[buffer.Length + 3] = bytes[0];
 
-            udp.Send(finalBuffer, finalBuffer.Length, new IPEndPoint(IPAddress.Parse("127.0.0.1"), vrcSendPort));
+            SendBytesToPort(finalBuffer, vrcSendPort);
         }
         public static void SendBoolToVRC(string address, bool value)
         {
@@ -192,7 +221,12 @@ namespace HeadsetBatteryInfo
             AlignStringBytes(ref sendBack);
 
             var buffer = Encoding.ASCII.GetBytes(sendBack);
-            udp.Send(buffer, buffer.Length, new IPEndPoint(IPAddress.Parse("127.0.0.1"), vrcSendPort));
+            SendBytesToPort(buffer, vrcSendPort);
+        }
+
+        public static void SendBytesToPort(byte[] buffer, int port)
+        {
+            udp.Send(buffer, buffer.Length, new IPEndPoint(IPAddress.Parse("127.0.0.1"), port));
         }
 
         struct Msg

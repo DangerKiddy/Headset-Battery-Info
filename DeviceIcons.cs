@@ -15,13 +15,6 @@ namespace HeadsetBatteryInfo
 
     public static class DeviceIcons
     {
-        public struct Icons
-        {
-            public ImageSource highBattery;
-            public ImageSource mediumBattery;
-            public ImageSource lowBattery;
-        }
-
         public struct HeadsetIcons
         {
             public ImageSource headset;
@@ -31,17 +24,8 @@ namespace HeadsetBatteryInfo
             public ImageSource rightController;
             public ImageSource companyLogo;
         }
-        private struct CompanyImages
-        {
-            public BitmapSource headsetIcon;
-            public BitmapSource headsetChargingIcon;
-            public BitmapSource leftControllerIcon;
-            public BitmapSource leftControllerChargingIcon;
-            public BitmapSource rightControllerIcon;
-            public BitmapSource rightControllerChargingIcon;
-        }
 
-        private enum Company
+        public enum Company
         {
             Unknown = -1,
 
@@ -95,6 +79,11 @@ namespace HeadsetBatteryInfo
                 headsetCompany = Company.Unknown;
         }
 
+        public static Company GetCompany()
+        {
+            return headsetCompany;
+        }
+
         public static LinearGradientBrush GetBlueGradient() => blueGradientBrush;
         public static LinearGradientBrush GetGreenGradient() => greenGradientBrush;
         public static LinearGradientBrush GetYellowGradient() => yellowGradientBrush;
@@ -116,18 +105,11 @@ namespace HeadsetBatteryInfo
 
         private static void InitDefaultIcons()
         {
-            var controllerIcon = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/unknown/controller.png")) as BitmapSource;
-            var controllerChargingIcon = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/unknown/controller_charging.png")) as BitmapSource;
+            Unknown.headset = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/unknown/headset.png")) as BitmapSource;
+            Unknown.leftController = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/unknown/controller.png")) as BitmapSource;
+            Unknown.rightController = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/unknown/controller.png")) as BitmapSource;
 
-            CompanyImages icons = new CompanyImages();
-            icons.headsetIcon = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/unknown/headset.png")) as BitmapSource;
-            icons.leftControllerIcon = controllerIcon;
-            icons.rightControllerIcon = controllerIcon;
-
-            icons.headsetChargingIcon = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/unknown/headset_charging.png")) as BitmapSource;
-            icons.leftControllerChargingIcon = controllerChargingIcon;
-            icons.rightControllerChargingIcon = controllerChargingIcon;
-
+            Unknown.headsetCharging = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/unknown/headset_charging.png")) as BitmapSource;
             Unknown.companyLogo = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/unknown/logo.png"));
         }
         private static void InitPicoIcons()

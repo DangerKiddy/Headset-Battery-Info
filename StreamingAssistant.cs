@@ -88,7 +88,7 @@ namespace HeadsetBatteryInfo
             bool streamingAppFound = false;
             while (!streamingAppFound)
             {
-                if (!isActive)
+                if (!isActive || !MainWindow.IsRunAsAdmin())
                     break;
 
                 var processes = Process.GetProcessesByName("Streaming Assistant");

@@ -13,7 +13,14 @@ namespace HeadsetBatteryInfo
 
         public const string Setting_UseStreamingApp = "useStreamingApp";
         public const string Setting_PredictHeadsetCharge = "predictCharging";
+
         public const string Setting_HeadsetNotifyLowBattery = "notifyOnHeadsetLowBattery";
+        public const string Setting_ControllersNotifyLowBattery = "notifyOnControllerLowBattery";
+
+        public const string Setting_HeadsetNotifyStopCharging = "notifyOnHeadsetStopCharging";
+
+        public const string Setting_OVRToolkitNotification = "ovrToolkitSupport";
+        public const string Setting_XSOverlayNotification = "xsOverlaySupport";
 
         public static T GetValue<T>(string key, T _default = default(T))
         {
