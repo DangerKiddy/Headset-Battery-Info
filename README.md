@@ -6,10 +6,15 @@ Originally planned to work with [APK on headset](https://github.com/DangerKiddy/
 You can find external DLL module for OVR Toolkit [here](https://github.com/DangerKiddy/Headset-Battery-Info-OVRToolkit)\
 For XSOverlay there is no feature for adding custom modules yet. 
 
-## APK on the headset
+## How to use
+- Download latest release from [this page](https://github.com/DangerKiddy/Headset-Battery-Info/releases) and extract archive anywhere you want to.
+- Launch Headset Battery Info
+- Choose one of the battery tracking method down bellow
+
+### APK on the headset
 If you're not using Pico's Streaming Assistant, then you can install APK on your headset and pair it with your PC to keep track of headset's battery state. For that you should follor [this tutorial](https://github.com/DangerKiddy/Headset-Battery-Info-Sender)
 
-## Pico's Streaming Assistant battery tracking
+### Pico's Streaming Assistant battery tracking
 This method allows you to track your battery state without installing APK on your headset if you're using Pico 4/Pro and Pico's Streaming Assistant.\
 Make sure to change battery track method in settings:\
 ![1](https://github.com/DangerKiddy/Headset-Battery-Info/assets/42438297/7824f2f4-a15b-4993-a75d-aa1db275b1be)\
