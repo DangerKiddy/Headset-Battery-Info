@@ -219,13 +219,11 @@ namespace HeadsetBatteryInfo
 
                     bool isCharging = IsCharging(timeSinceLastChange, batteryLevelDifference);
 
-                    MainWindow.WriteLog($"Time: {timeSinceLastChange}, Charge state: {isCharging}\n");
                     MainWindow.Instance.OnReceiveBatteryState(isCharging, DeviceType.Headset);
                 }
 
                 if (lastTimeDifference != 0 && !BatteryInfoReceiver.IsHeadsetCharging() && IsCharging(timeSinceLastChange, 1))
                 {
-                    MainWindow.WriteLog($"Time: {timeSinceLastChange}, Charge state: {true}\n");
                     MainWindow.Instance.OnReceiveBatteryState(true, DeviceType.Headset);
                 }
             }

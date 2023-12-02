@@ -31,7 +31,6 @@ namespace HeadsetBatteryInfo
 
                 return;
             }
-            File.WriteAllText("log.txt", "");
 
             Settings.Load();
             Overlay.Init();
@@ -52,11 +51,6 @@ namespace HeadsetBatteryInfo
             WindowsPrincipal principal = new WindowsPrincipal(id);
 
             return principal.IsInRole(WindowsBuiltInRole.Administrator);
-        }
-
-        public static void WriteLog(string message)
-        {
-            File.AppendAllText("log.txt", message);
         }
 
         private void InitDefaultUiValues()
@@ -368,6 +362,13 @@ namespace HeadsetBatteryInfo
                 if (option.CustomCheck != null && !option.CustomCheck())
                     continue;
 
+                if (option.Name == "")
+                {
+                    menu.Items.Add(new Separator());
+
+                    continue;
+                }
+
                 var value = Settings.GetValue<bool>(option.Setting, option.Default);
                 value = option.Mirror ? !value : value;
 
@@ -434,6 +435,8 @@ namespace HeadsetBatteryInfo
                     Instance.InitHeadsetListener();
                 }
             },
+
+            new ContextMenuOption() { Name = "" },
 
             new ContextMenuOption()
             {
