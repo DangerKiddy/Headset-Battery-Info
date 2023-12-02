@@ -6,7 +6,10 @@
         xmlns:local="clr-namespace:HeadsetBatteryInfo"
         mc:Ignorable="d"
         Title="Headset Battery Info" Height="105" Width="365" ResizeMode="NoResize" WindowStyle="None"
-        MouseDown="Window_MouseDown">
+        MouseDown="Window_MouseDown"
+        WindowStartupLocation="CenterScreen"
+        Icon="/icon.png"
+        >
     
     <Window.Background>
         <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
