@@ -20,3 +20,12 @@ Make sure to change battery track method in settings:\
 ![1](https://github.com/DangerKiddy/Headset-Battery-Info/assets/42438297/7824f2f4-a15b-4993-a75d-aa1db275b1be)\
 And then you can open your Streaming Assistant and pair your headset (if you didn't do that before launching Headset Battery Info).\
 ![2](https://github.com/DangerKiddy/Headset-Battery-Info/assets/42438297/06581a82-6766-4a53-9551-79f9150c6f6a)
+
+# OSC
+Application sends OSC messages with current battery info to VRChat (port 9000)
+| Address | Animator Parameter | Value Type |
+| ------- | ------------------ | ---------- |
+| /avatar/parameters/controllerLeftBatteryLevel | controllerLeftBatteryLevel | float `0.0 - 1.0` |
+| /avatar/parameters/controllerRightBatteryLevel | controllerRightBatteryLevel | float `0.0 - 1.0` |
+| /avatar/parameters/headsetBatteryLevel | headsetBatteryLevel | float `0.0 - 1.0` |
+| /avatar/parameters/isHeadsetCharging | isHeadsetCharging | bool `False / True` |
