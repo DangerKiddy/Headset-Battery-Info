@@ -1,4 +1,6 @@
-﻿namespace HeadsetBatteryInfo
+﻿using System;
+
+namespace HeadsetBatteryInfo
 {
     internal static class BatteryInfoReceiver
     {
@@ -59,7 +61,7 @@
 
             OnHeadsetBatteryLevelChanged(currentHeadsetLevel); // required for updating icon and letting vrc know about latest battery lvl
 
-            if (!isCharging && Settings.GetValue<bool>(Settings.Setting_HeadsetNotifyStopCharging, true) && previousHeadsetChargingState != isCharging)
+            if (!isCharging && Settings.GetValue<bool>(Settings.Setting_HeadsetNotifyStopCharging, true) && previousHeadsetChargingState)
             {
                 MainWindow.PlayBatteryStateSound();
 
@@ -105,7 +107,7 @@
             currentControllerLeftLevel = level;
             MainWindow.SetDeviceBatteryLevel(DeviceType.ControllerLeft, currentControllerLeftLevel, isControllerLeftCharging);
 
-            CheckAndNotifyControllerLowBattery(level);
+            CheckAndNotifyControllerLowBattery();
 
             OSC.SendFloatToVRC(OSC.vrcControllerLeftBatteryLvlAddress, currentControllerLeftLevel / 100f);
             Overlay.UpdateWristInfo(DeviceType.ControllerLeft, level, false);
@@ -118,16 +120,18 @@
             currentControllerRightLevel = level;
             MainWindow.SetDeviceBatteryLevel(DeviceType.ControllerRight, currentControllerRightLevel, isControllerRightCharging);
 
-            CheckAndNotifyControllerLowBattery(level);
+            CheckAndNotifyControllerLowBattery();
 
             OSC.SendFloatToVRC(OSC.vrcControllerRightBatteryLvlAddress, currentControllerRightLevel / 100f);
             Overlay.UpdateWristInfo(DeviceType.ControllerRight, level, false);
         }
 
         private static bool notifiedAboutControllerLowBattery = false;
-        private static void CheckAndNotifyControllerLowBattery(int level)
+        private static void CheckAndNotifyControllerLowBattery()
         {
-            if (level < lowBatteryPercent && Settings.GetValue<bool>(Settings.Setting_ControllersNotifyLowBattery, true))
+            var lowestLevel = Math.Min(currentControllerRightLevel, currentControllerLeftLevel);
+
+            if (lowestLevel < lowBatteryPercent && Settings.GetValue<bool>(Settings.Setting_ControllersNotifyLowBattery, true))
             {
                 if (!notifiedAboutControllerLowBattery)
                     NotifyLowBattery(DeviceType.ControllerLeft);
