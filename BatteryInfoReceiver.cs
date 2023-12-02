@@ -1,7 +1,4 @@
-﻿using Microsoft.Toolkit.Uwp.Notifications;
-using System;
-
-namespace HeadsetBatteryInfo
+﻿namespace HeadsetBatteryInfo
 {
     internal static class BatteryInfoReceiver
     {

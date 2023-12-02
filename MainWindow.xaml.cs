@@ -135,9 +135,7 @@ namespace HeadsetBatteryInfo
             void SetColors(System.Windows.Media.LinearGradientBrush gradient, System.Windows.Media.SolidColorBrush solid)
             {
                 System.Windows.Media.LinearGradientBrush useColor = gradient;
-                if (!isCharging)
-                    useColor = gradient;
-                else
+                if (isCharging)
                     useColor = DeviceIcons.GetBlueGradient();
 
                 background.Fill = useColor;

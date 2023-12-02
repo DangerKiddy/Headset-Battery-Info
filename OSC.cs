@@ -76,30 +76,6 @@ namespace HeadsetBatteryInfo
         public static void StartListening()
         {
             Listen();
-
-            //Test();
-        }
-
-        private static async void Test()
-        {
-            while (true)
-            {
-                if (headsetEndPoint != null)
-                {
-                    var sendBack = "/requestBatteryInfo";
-                    AlignStringBytes(ref sendBack);
-
-                    sendBack += ",T";
-                    AlignStringBytes(ref sendBack);
-
-                    var buffer = Encoding.ASCII.GetBytes(sendBack);
-                    udp.Send(buffer, buffer.Length, headsetEndPoint);
-
-                    Console.WriteLine("Sent message to the headset");
-                }
-
-                await Task.Delay(1000);
-            }
         }
 
         private static async void Listen()

@@ -33,11 +33,6 @@ namespace HeadsetBatteryInfo
             Meta
         }
 
-        public static Color lowBattery = Color.FromArgb(255, 255, 95, 95);
-        public static Color mediumBattery = Color.FromArgb(255, 252, 142, 0);
-        public static Color highBattery = Color.FromArgb(255, 154, 209, 43);
-        public static Color charging = Color.FromArgb(255, 27, 132, 212);
-
         public static HeadsetIcons Unknown;
         public static HeadsetIcons Pico;
         public static HeadsetIcons Meta;
@@ -97,39 +92,27 @@ namespace HeadsetBatteryInfo
 
         public static void Init()
         {
-            InitDefaultIcons();
-            InitPicoIcons();
-            InitMetaIcons();
+            InitFolder("unknown", true, ref Unknown);
+
+            InitFolder("pico", false, ref Pico);
+            InitFolder("meta", false, ref Meta);
+
             InitGradient();
         }
 
-        private static void InitDefaultIcons()
+        private static void InitFolder(string folder, bool singleControllerImage, ref HeadsetIcons icons)
         {
-            Unknown.headset = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/unknown/headset.png")) as BitmapSource;
-            Unknown.leftController = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/unknown/controller.png")) as BitmapSource;
-            Unknown.rightController = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/unknown/controller.png")) as BitmapSource;
+            var leftControllerName = singleControllerImage ? "controller" : "left_controller";
+            var rightControllerName = singleControllerImage ? "controller" : "right_controller";
 
-            Unknown.headsetCharging = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/unknown/headset_charging.png")) as BitmapSource;
-            Unknown.companyLogo = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/unknown/logo.png"));
-        }
-        private static void InitPicoIcons()
-        {
-            Pico.headset = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/pico/headset.png")) as BitmapSource;
-            Pico.leftController = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/pico/left_controller.png")) as BitmapSource;
-            Pico.rightController = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/pico/right_controller.png")) as BitmapSource;
+            icons.headset = ConvertBitmapToImageSource(new System.Drawing.Bitmap($"Assets/Images/{folder}/headset.png")) as BitmapSource;
+            icons.leftController = ConvertBitmapToImageSource(new System.Drawing.Bitmap($"Assets/Images/{folder}/{leftControllerName}.png")) as BitmapSource;
+            icons.rightController = ConvertBitmapToImageSource(new System.Drawing.Bitmap($"Assets/Images/{folder}/{rightControllerName}.png")) as BitmapSource;
 
-            Pico.headsetCharging = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/pico/headset_charging.png")) as BitmapSource;
-            Pico.companyLogo = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/pico/logo.png"));
+            icons.headsetCharging = ConvertBitmapToImageSource(new System.Drawing.Bitmap($"Assets/Images/{folder}/headset_charging.png")) as BitmapSource;
+            icons.companyLogo = ConvertBitmapToImageSource(new System.Drawing.Bitmap($"Assets/Images/{folder}/logo.png"));
         }
-        private static void InitMetaIcons()
-        {
-            Meta.headset = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/meta/headset.png")) as BitmapSource;
-            Meta.leftController = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/meta/left_controller.png")) as BitmapSource;
-            Meta.rightController = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/meta/right_controller.png")) as BitmapSource;
 
-            Meta.headsetCharging = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/meta/headset_charging.png")) as BitmapSource;
-            Meta.companyLogo = ConvertBitmapToImageSource(new System.Drawing.Bitmap("Assets/Images/meta/logo.png"));
-        }
         private static void InitGradient()
         {
             blueSolid.Color = Color.FromRgb(55, 152, 231);
@@ -189,42 +172,6 @@ namespace HeadsetBatteryInfo
             bitmapImage.EndInit();
 
             return bitmapImage;
-        }
-        private static ImageSource ChangeImageColor(BitmapSource originalImageSource, Color newColor)
-        {
-            int width = originalImageSource.PixelWidth;
-            int height = originalImageSource.PixelHeight;
-
-            WriteableBitmap writableBitmap = new WriteableBitmap(originalImageSource);
-            writableBitmap.Lock();
-
-            byte r = newColor.R;
-            byte g = newColor.G;
-            byte b = newColor.B;
-
-            int stride = writableBitmap.BackBufferStride;
-
-            unsafe
-            {
-                for (int y = 0; y < height; y++)
-                {
-                    byte* row = (byte*)writableBitmap.BackBuffer + y * stride;
-
-                    for (int x = 0; x < width; x++)
-                    {
-                        byte* pixel = row + x * 4;
-
-                        pixel[2] = r;
-                        pixel[1] = g;
-                        pixel[0] = b;
-                    }
-                }
-            }
-
-            writableBitmap.AddDirtyRect(new Int32Rect(0, 0, width, height));
-            writableBitmap.Unlock();
-
-            return writableBitmap;
         }
     }
 }
