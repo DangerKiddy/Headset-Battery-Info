@@ -24,7 +24,7 @@ namespace HeadsetBatteryInfo
             ShowStatusText();
 
             DeviceIcons.Init();
-            bool isSuccess = OSC.Init(); // required for sending stuff to vrc
+            bool isSuccess = OSC.Init();
             if (!isSuccess)
             {
                 SetStatusText("Failed to init OSC!\nSomething else is listening to 28092 port?");
