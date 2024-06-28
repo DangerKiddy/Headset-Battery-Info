@@ -3,8 +3,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Interop;
-using System.Windows.Markup;
 
 namespace HeadsetBatteryInfo
 {
@@ -173,6 +171,7 @@ namespace HeadsetBatteryInfo
         {
             if (!Settings._config.enableOSC)
                 return;
+
             var sendBack = address + '\0';
             AlignStringBytes(ref sendBack);
 
