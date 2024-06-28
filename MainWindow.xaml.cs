@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Media;
 using System.Security.Principal;
 using System.Windows;
@@ -8,7 +6,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
-using Windows.System;
 
 namespace HeadsetBatteryInfo
 {
