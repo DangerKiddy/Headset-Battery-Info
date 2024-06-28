@@ -392,6 +392,8 @@ namespace HeadsetBatteryInfo
                 (s, e) => ToggleSetting(() => Settings._config.ovrToolkitSupport, val => Settings._config.ovrToolkitSupport = val), Settings._config.ovrToolkitSupport);
             BuildMenuItem(menu, "(XSOverlay) Send notifications about battery state",
                 (s, e) => ToggleSetting(() => Settings._config.xsOverlaySupport, val => Settings._config.xsOverlaySupport = val), Settings._config.xsOverlaySupport);
+            BuildMenuItem(menu, "(VRChat) Send OSC data to VRChat",
+                (s, e) => ToggleSetting(() => Settings._config.enableOSC, val => Settings._config.enableOSC = val), Settings._config.enableOSC);
         }
 
         private void AddReceiveModeMenuItem(ContextMenu menu, string header, int mode, Action action)

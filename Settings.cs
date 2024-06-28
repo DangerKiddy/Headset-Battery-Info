@@ -19,6 +19,8 @@ namespace HeadsetBatteryInfo
             notifyOnHeadsetStopCharging = true,
             ovrToolkitSupport = false,
             xsOverlaySupport = false,
+            enableOSC = true,
+            OSCport = 9000
             batteryDischargeMaximumTime = 70000
         };
 

@@ -12,7 +12,7 @@ namespace HeadsetBatteryInfo
     {
         private const string ipAddress = "127.0.0.1";
         private const int headsetPort = 28092;
-        private const int vrcSendPort = 9000;
+        private static int vrcSendPort = 9000;
 
         public const string vrcControllerLeftBatteryLvlAddress = "/avatar/parameters/controllerLeftBatteryLevel";
         public const string vrcControllerRightBatteryLvlAddress = "/avatar/parameters/controllerRightBatteryLevel";
@@ -28,6 +28,8 @@ namespace HeadsetBatteryInfo
         {
             bool isSuccess = false;
             isActive = true;
+
+            vrcSendPort = Settings._config.OSCport;
 
             try
             {
@@ -169,6 +171,8 @@ namespace HeadsetBatteryInfo
         }
         public static void SendFloatToVRC(string address, float value)
         {
+            if (!Settings._config.enableOSC)
+                return;
             var sendBack = address + '\0';
             AlignStringBytes(ref sendBack);
 
@@ -189,6 +193,8 @@ namespace HeadsetBatteryInfo
         }
         public static void SendBoolToVRC(string address, bool value)
         {
+            if (!Settings._config.enableOSC)
+                return;
             var sendBack = address + '\0';
             AlignStringBytes(ref sendBack);
 
