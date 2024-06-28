@@ -2,86 +2,41 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
+using Windows.ApplicationModel.VoiceCommands;
+using Windows.Storage.Pickers.Provider;
 
 namespace HeadsetBatteryInfo
 {
     internal class Settings
     {
-        private static Dictionary<string, object> settingsValues = new Dictionary<string, object>();
-
-        public const string Setting_UseStreamingApp = "useStreamingApp";
-        public const string Setting_PredictHeadsetCharge = "predictCharging";
-
-        public const string Setting_HeadsetNotifyLowBattery = "notifyOnHeadsetLowBattery";
-        public const string Setting_ControllersNotifyLowBattery = "notifyOnControllerLowBattery";
-
-        public const string Setting_HeadsetNotifyStopCharging = "notifyOnHeadsetStopCharging";
-
-        public const string Setting_OVRToolkitNotification = "ovrToolkitSupport";
-        public const string Setting_XSOverlayNotification = "xsOverlaySupport";
-
-        public static T GetValue<T>(string key, T _default = default(T))
+        public static Config _config = new Config
         {
-            object o;
-            if (!settingsValues.TryGetValue(key, out o))
-               return _default;
+            receiveMode = 0,
+            predictCharging = false,
+            notifyOnControllerLowBattery = false,
+            notifyOnHeadsetLowBattery = false,
+            notifyOnHeadsetStopCharging = false,
+            ovrToolkitSupport = false,
+            xsOverlaySupport = false
+        };
 
-            return (T)o;
-        }
-        public static void SetValue(string key, object value, bool noSave = false)
-        {
-            settingsValues[key] = value;
-
-            if (!noSave)
-                Save();
-        }
+        private static readonly string fileName = "settings.json";
 
         public static void Save()
         {
-            string settings = "";
-
-            foreach (KeyValuePair<string, object> kv in settingsValues)
-            {
-                settings += $"{kv.Key}: {kv.Value}\n";
-            }
-
-            File.WriteAllText("settings.txt", settings);
+            File.WriteAllText(fileName, JsonSerializer.Serialize(_config, new JsonSerializerOptions { WriteIndented = true }));
         }
 
         public static void Load()
         {
-            if (!File.Exists("settings.txt"))
-                return;
-
-            var settings = File.ReadAllLines("settings.txt");
-
-            foreach (var setting in settings)
+            if (!File.Exists(fileName))
             {
-                var seperatorIndex = setting.IndexOf(':');
-                if (seperatorIndex == -1)
-                    continue;
-
-                string key = setting.Substring(0, seperatorIndex).Trim();
-                string value = setting.Substring(seperatorIndex + 1).Trim();
-
-                if (value == "True" || value == "False")
-                {
-                    SetValue(key, bool.Parse(value), true);
-                }
-                else if (value.StartsWith("\""))
-                {
-                    value = value.Trim('"');
-                    SetValue(key, value, true);
-                }
-                else if (value.Contains(','))
-                {
-                    SetValue(key, float.Parse(value), true);
-                }
-                else
-                {
-                    SetValue(key, int.Parse(value), true);
-                }
+                File.Create(fileName).Close();
+                File.WriteAllText(fileName, JsonSerializer.Serialize(_config, new JsonSerializerOptions { WriteIndented = true }));
             }
+
+            _config = JsonSerializer.Deserialize<Config>(File.ReadAllText(fileName));
         }
     }
 }

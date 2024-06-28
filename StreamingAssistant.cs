@@ -188,7 +188,7 @@ namespace HeadsetBatteryInfo
 
                     if (headsetBatteryLevel >= 0 && headsetBatteryLevel <= 100)
                     {
-                        if (Settings.GetValue<bool>(Settings.Setting_PredictHeadsetCharge))
+                        if (Settings._config.predictCharging)
                             PredictChargeState(headsetBatteryLevel);
 
                         MainWindow.Instance.OnReceiveBatteryLevel(headsetBatteryLevel, DeviceType.Headset);

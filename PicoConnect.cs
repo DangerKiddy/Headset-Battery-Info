@@ -17,9 +17,13 @@ namespace HeadsetBatteryInfo
 
         private static bool picoConnectAppFound = false;
 
+        private static bool isTeardown = true;
+
         public static async void Init()
         {
-            while (true)
+            isTeardown = false;
+            
+            while (!isTeardown)
             {
                 var processes = Process.GetProcessesByName("PICO Connect");
 
@@ -44,7 +48,7 @@ namespace HeadsetBatteryInfo
 
         private static async void Listen()
         {
-            while (true)
+            while (!isTeardown)
             {
                 if (!picoConnectAppFound)
                     continue;
@@ -119,6 +123,11 @@ namespace HeadsetBatteryInfo
         private static bool IsCharging(long timeSinceLastChange, int batteryLevelDifference)
         {
             return timeSinceLastChange >= batteryDischargeMaximumTime || batteryLevelDifference <= 0;
+        }
+
+        public static void Terminate()
+        {
+            isTeardown = true;
         }
     }
 }
