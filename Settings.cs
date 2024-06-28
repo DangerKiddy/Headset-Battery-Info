@@ -18,7 +18,9 @@ namespace HeadsetBatteryInfo
             notifyOnHeadsetLowBattery = false,
             notifyOnHeadsetStopCharging = false,
             ovrToolkitSupport = false,
-            xsOverlaySupport = false
+            xsOverlaySupport = false,
+            enableOSC = true,
+            OSCport = 9000
         };
 
         private static readonly string fileName = "settings.json";
