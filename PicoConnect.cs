@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -10,7 +11,19 @@ namespace HeadsetBatteryInfo
 {
     internal class PicoConnect
     {
-        private static readonly long batteryDischargeMaximumTime = 70000;
+        private enum Side
+        {
+            Left,
+            Right
+        }
+        private class BatteryInfoCallback
+        {
+            public DeviceType deviceType { get; set; }
+            public Side side { get; set; }
+            public bool active { get; set; }
+            public int percentage { get; set; }
+        }
+
         private static readonly string fileName = "pico_connect*.log";
         private static readonly string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PICO Connect\\logs");
 
@@ -51,52 +64,61 @@ namespace HeadsetBatteryInfo
             {
                 if (!picoConnectAppFound)
                     continue;
+
                 string file = GetLatestFileName(path, fileName);
                 if (!File.Exists(file))
                     continue;
-                int[] batteries = await Task.Run(int[]() =>
+
+                var batteryInfo = await Task.Run(BatteryInfoCallback[]() =>
                 {
                     return ParseLog(file);
                 });
-                if (batteries.Length == 0)
+
+                if (batteryInfo.Length == 0)
                     continue;
 
-                MainWindow.SetDeviceBatteryLevel(DeviceType.Headset, batteries[2], false);
-                MainWindow.SetDeviceBatteryLevel(DeviceType.ControllerLeft, batteries[0], false);
-                MainWindow.SetDeviceBatteryLevel(DeviceType.ControllerRight, batteries[1], false);
+                foreach (var battery in batteryInfo)
+                {
+                    if (Settings._config.predictCharging && battery.deviceType == DeviceType.Headset)
+                        StreamingAssistant.PredictChargeState(battery.percentage);
 
-                MainWindow.Instance.OnReceiveBatteryLevel(batteries[2], DeviceType.Headset);
-                MainWindow.Instance.OnReceiveBatteryLevel(batteries[0], DeviceType.ControllerLeft);
-                MainWindow.Instance.OnReceiveBatteryLevel(batteries[1], DeviceType.ControllerRight);
+                    if (battery.deviceType == DeviceType.ControllerLeft)
+                    {
+                        MainWindow.Instance.OnReceiveBatteryLevel(battery.percentage, battery.side == Side.Left ? DeviceType.ControllerLeft : DeviceType.ControllerRight);
+                    }
+                    else
+                    {
+                        MainWindow.Instance.OnReceiveBatteryLevel(battery.percentage, battery.deviceType);
+                    }
+                }
+
 
                 await Task.Delay(TimeSpan.FromMilliseconds(3000));
             }
         }
 
-        private static int[] ParseLog(string fileName)
+        private static BatteryInfoCallback[] ParseLog(string fileName)
         {
             using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
-                int[] percentage = new int[3];
+                BatteryInfoCallback[] percentage = new BatteryInfoCallback[3];
                 StreamReader sr = new StreamReader(fs);
                 string[] strings = sr.ReadToEnd().Split('\n');
-                string pattern = "(.*?) \\[info\\]  update battery info callback, battery_info: \\[{\"deviceType\":1,\"side\":0,\"active\":true,\"percentage\":(.*?)},{\"deviceType\":1,\"side\":1,\"active\":true,\"percentage\":(.*?)},{\"deviceType\":0,\"side\":-1,\"active\":true,\"percentage\":(.*?)}\\]";
-                foreach (string s in strings)
+
+                string pattern = "(.*?) \\[info\\]  update battery info callback, battery_info: (.+)\\r";
+                for (int i = strings.Length-1; i > 0; i--)
                 {
+                    string s = strings[i];
+
                     if (s.Contains("update battery info callback"))
                     {
-                        try
-                        {
-                            int.TryParse(Regex.Match(s, pattern).Result("$2"), out percentage[0]);
-                            int.TryParse(Regex.Match(s, pattern).Result("$3"), out percentage[1]);
-                            int.TryParse(Regex.Match(s, pattern).Result("$4"), out percentage[2]);
-                        }
-                        catch (Exception ex)
-                        {
-                        }
-                    }
+                        var res = Regex.Match(s, pattern).Result("$2");
+                        BatteryInfoCallback[] info = JsonSerializer.Deserialize<BatteryInfoCallback[]>(res);
 
+                        return info;
+                    }
                 }
+                
                 return percentage;
             }
         }
@@ -123,12 +145,8 @@ namespace HeadsetBatteryInfo
             var qry = from x in list
                       orderby x.FileCreateTime
                       select x;
-            return qry.LastOrDefault().FileName;
-        }
 
-        private static bool IsCharging(long timeSinceLastChange, int batteryLevelDifference)
-        {
-            return timeSinceLastChange >= batteryDischargeMaximumTime || batteryLevelDifference <= 0;
+            return qry.LastOrDefault().FileName;
         }
 
         public static void Terminate()

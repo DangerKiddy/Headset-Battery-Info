@@ -9,6 +9,6 @@
         public bool notifyOnHeadsetStopCharging { get; set; }
         public bool ovrToolkitSupport { get; set; }
         public bool xsOverlaySupport { get; set; }
-
+        public int batteryDischargeMaximumTime { get; set; }
     }
 }
