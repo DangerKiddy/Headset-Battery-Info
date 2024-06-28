@@ -80,16 +80,16 @@ namespace HeadsetBatteryInfo
                 int[] percentage = new int[3];
                 StreamReader sr = new StreamReader(fs);
                 string[] strings = sr.ReadToEnd().Split('\n');
-                string pattern = "(.*?) \\[info\\]  update battery info callback, battery_info: \\[{\"deviceType\":1,\"side\":0,\"active\":true,\"percentage\":(.*?)},{\"deviceType\":1,\"side\":1,\"active\":true,\"percentage\":(.*?)},{\"deviceType\":0,\"side\":-1,\"active\":true,\"percentage\":(.*?)}\\]";
+                string pattern = "(.*?) \\[info\\]  update battery info callback, battery_info: \\[{\"deviceType\":1,\"side\":0,\"active\":(.*?),\"percentage\":(.*?)},{\"deviceType\":1,\"side\":1,\"active\":(.*?),\"percentage\":(.*?)},{\"deviceType\":0,\"side\":-1,\"active\":true,\"percentage\":(.*?)}\\]";
                 foreach (string s in strings)
                 {
                     if (s.Contains("update battery info callback"))
                     {
                         try
                         {
-                            int.TryParse(Regex.Match(s, pattern).Result("$2"), out percentage[0]);
-                            int.TryParse(Regex.Match(s, pattern).Result("$3"), out percentage[1]);
-                            int.TryParse(Regex.Match(s, pattern).Result("$4"), out percentage[2]);
+                            int.TryParse(Regex.Match(s, pattern).Result("$3"), out percentage[0]);
+                            int.TryParse(Regex.Match(s, pattern).Result("$5"), out percentage[1]);
+                            int.TryParse(Regex.Match(s, pattern).Result("$6"), out percentage[2]);
                         }
                         catch (Exception ex)
                         {
