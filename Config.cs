@@ -11,6 +11,6 @@
         public bool xsOverlaySupport { get; set; }
         public bool enableOSC { get; set; }
         public int OSCport { get; set; }
-
+        public int batteryDischargeMaximumTime { get; set; }
     }
 }
