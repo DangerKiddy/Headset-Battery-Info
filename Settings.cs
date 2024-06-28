@@ -20,7 +20,7 @@ namespace HeadsetBatteryInfo
             ovrToolkitSupport = false,
             xsOverlaySupport = false,
             enableOSC = true,
-            OSCport = 9000
+            OSCport = 9000,
             batteryDischargeMaximumTime = 70000
         };
 
