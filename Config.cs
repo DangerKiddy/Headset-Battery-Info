@@ -12,5 +12,6 @@
         public bool enableOSC { get; set; }
         public int OSCport { get; set; }
         public int batteryDischargeMaximumTime { get; set; }
+        public int lowBatteryNotifyLevel { get; set; }
     }
 }

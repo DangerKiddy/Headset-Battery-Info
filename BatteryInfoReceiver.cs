@@ -4,8 +4,6 @@ namespace HeadsetBatteryInfo
 {
     internal static class BatteryInfoReceiver
     {
-        private static int lowBatteryPercent = 25; // if battery percent below this value then notify about it
-
         public static void OnReceiveBatteryLevel(int level, DeviceType device)
         {
             switch (device)
@@ -84,7 +82,7 @@ namespace HeadsetBatteryInfo
             currentHeadsetLevel = level;
             MainWindow.SetDeviceBatteryLevel(DeviceType.Headset, currentHeadsetLevel, isHeadsetCharging);
 
-            if (level < lowBatteryPercent && Settings._config.notifyOnHeadsetLowBattery)
+            if (level < Settings._config.lowBatteryNotifyLevel && Settings._config.notifyOnHeadsetLowBattery)
             {
                 if (!notifiedAboutHeadsetLowBattery)
                     NotifyLowBattery(DeviceType.Headset);
@@ -131,7 +129,7 @@ namespace HeadsetBatteryInfo
         {
             var lowestLevel = Math.Min(currentControllerRightLevel, currentControllerLeftLevel);
 
-            if (lowestLevel < lowBatteryPercent && Settings._config.notifyOnControllerLowBattery)
+            if (lowestLevel < Settings._config.lowBatteryNotifyLevel && Settings._config.notifyOnControllerLowBattery)
             {
                 if (!notifiedAboutControllerLowBattery)
                     NotifyLowBattery(DeviceType.ControllerLeft);

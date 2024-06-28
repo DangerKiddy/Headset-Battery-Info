@@ -16,7 +16,8 @@ namespace HeadsetBatteryInfo
             xsOverlaySupport = false,
             enableOSC = true,
             OSCport = 9000,
-            batteryDischargeMaximumTime = 70000
+            batteryDischargeMaximumTime = 70000,
+            lowBatteryNotifyLevel = 30
         };
 
         private static readonly string fileName = "settings.json";

@@ -415,10 +415,12 @@ namespace HeadsetBatteryInfo
 
         private void BuildHeadsetSettingMenu(ContextMenu menu)
         {
-            BuildMenuItem(menu, "(Streaming Assistant) Predict charging state",
+            BuildMenuItem(menu, "(Streaming Assistant/PICO Connect) Predict charging state",
                 (s, e) => ToggleSetting(() => Settings._config.predictCharging, val => Settings._config.predictCharging = val), Settings._config.predictCharging);
-            BuildMenuItem(menu, "Notify on low battery",
+
+            BuildMenuItem(menu, $"Notify on low battery (When reaching {Settings._config.lowBatteryNotifyLevel}%)",
                 (s, e) => ToggleSetting(() => Settings._config.notifyOnHeadsetLowBattery, val => Settings._config.notifyOnHeadsetLowBattery = val), Settings._config.notifyOnHeadsetLowBattery);
+
             BuildMenuItem(menu, "Notify on charge stop",
                 (s, e) => ToggleSetting(() => Settings._config.notifyOnHeadsetStopCharging, val => Settings._config.notifyOnHeadsetStopCharging = val), Settings._config.notifyOnHeadsetStopCharging);
         }
