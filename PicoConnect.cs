@@ -55,13 +55,20 @@ namespace HeadsetBatteryInfo
                 string file = GetLatestFileName(path, fileName);
                 if (!File.Exists(file))
                     continue;
-                int[] batteries = ParseLog(file);
+                int[] batteries = await Task.Run(int[]() =>
+                {
+                    return ParseLog(file);
+                });
                 if (batteries.Length == 0)
                     continue;
 
                 MainWindow.SetDeviceBatteryLevel(DeviceType.Headset, batteries[2], false);
                 MainWindow.SetDeviceBatteryLevel(DeviceType.ControllerLeft, batteries[0], false);
                 MainWindow.SetDeviceBatteryLevel(DeviceType.ControllerRight, batteries[1], false);
+
+                MainWindow.Instance.OnReceiveBatteryLevel(batteries[2], DeviceType.Headset);
+                MainWindow.Instance.OnReceiveBatteryLevel(batteries[0], DeviceType.ControllerLeft);
+                MainWindow.Instance.OnReceiveBatteryLevel(batteries[1], DeviceType.ControllerRight);
 
                 await Task.Delay(TimeSpan.FromMilliseconds(3000));
             }
