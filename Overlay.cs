@@ -100,12 +100,12 @@ namespace HeadsetBatteryInfo
 
         public static void SendNotification(string message)
         {
-            if (Settings.GetValue<bool>(Settings.Setting_OVRToolkitNotification, true))
+            if (Settings._config.ovrToolkitSupport)
             {
                 ovrToolkit.SendNotification(message);
             }
 
-            if (Settings.GetValue<bool>(Settings.Setting_XSOverlayNotification, true))
+            if (Settings._config.xsOverlaySupport)
             {
                 xsOverlay.SendNotification(message);
             }

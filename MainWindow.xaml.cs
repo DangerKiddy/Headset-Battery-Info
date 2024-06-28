@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
+using Windows.System;
 
 namespace HeadsetBatteryInfo
 {
@@ -39,10 +40,18 @@ namespace HeadsetBatteryInfo
             ControllerLeftDropDown.IsEnabled = false;
             ControllerRightDropDown.IsEnabled = false;
 
-            if (Settings.GetValue<bool>("useStreamingApp"))
-                InitStreamingAppListener();
-            else
-                InitHeadsetListener();
+            switch (Settings._config.receiveMode)
+            {
+                case 0:
+                    InitHeadsetListener();
+                    break;
+                case 1:
+                    InitStreamingAppListener();
+                    break;
+                case 2:
+                    InitPicoConnectListener();
+                    break;
+            }
         }
 
         public static bool IsRunAsAdmin()
@@ -205,6 +214,14 @@ namespace HeadsetBatteryInfo
             StreamingAssistant.StartListening();
         }
 
+        private void InitPicoConnectListener()
+        {
+            SetStatusText("Waiting for Pico Connect app...");
+
+            PicoConnect.Init();
+            PicoConnect.StartListening();
+        }
+
         bool isCallbackInitialized = false;
         private void InitHeadsetListener()
         {
@@ -342,177 +359,102 @@ namespace HeadsetBatteryInfo
             WindowState = WindowState.Minimized;
         }
 
-        private struct ContextMenuOption
+        private void BuildMenuItem(ContextMenu menu, string header, RoutedEventHandler clickHandler, bool isChecked)
         {
-            public string Name;
-            public string Setting;
-            public bool Default;
-            public bool Mirror;
-
-            public Action CustomAction;
-            public Func<bool> CustomCheck; // Return false to prevent appearing option in context menu and executing action when clicking on option
+            var menuItem = new MenuItem
+            {
+                Header = header,
+                IsChecked = isChecked
+            };
+            menuItem.Click += clickHandler += (s, e) =>
+            {
+                Settings.Save();
+            };
+            menu.Items.Add(menuItem);
         }
 
-        private void BuildContextMenu(ContextMenu menu, List<ContextMenuOption> options)
+        private void BuildMainSettingMenu(ContextMenu menu)
         {
-            foreach (var option in options)
+            AddReceiveModeMenuItem(menu, "(Pico) Use PICO Connect", 2, () =>
             {
-                if (option.CustomCheck != null && !option.CustomCheck())
-                    continue;
-
-                if (option.Name == "")
-                {
-                    menu.Items.Add(new Separator());
-
-                    continue;
-                }
-
-                var value = Settings.GetValue<bool>(option.Setting, option.Default);
-                value = option.Mirror ? !value : value;
-
-                var btn = new MenuItem();
-                btn.Header = option.Name;
-                btn.Click += (object _sender, RoutedEventArgs _e) =>
-                {
-                    if (option.CustomCheck != null && !option.CustomCheck())
-                        return;
-
-                    if (option.CustomAction != null)
-                    {
-                        option.CustomAction();
-                    }
-                    else
-                    {
-                        Settings.SetValue(option.Setting, !Settings.GetValue<bool>(option.Setting, option.Default));
-                    }
-                };
-                btn.IsChecked = value;
-
-                menu.Items.Add(btn);
-            }
+                Instance.InitPicoConnectListener();
+            });
+            AddReceiveModeMenuItem(menu, "(Pico) Use Streaming Assistant", 1, () =>
+            {
+                Instance.InitStreamingAppListener();
+            });
+            AddReceiveModeMenuItem(menu, "(Any) Use Headset application", 0, () =>
+            {
+                Instance.InitHeadsetListener();
+            });
+            menu.Items.Add(new Separator());
+            BuildMenuItem(menu, "(OVR Toolkit) Send windows notifications about battery state",
+                (s, e) => ToggleSetting(() => Settings._config.ovrToolkitSupport, val => Settings._config.ovrToolkitSupport = val), Settings._config.ovrToolkitSupport);
+            BuildMenuItem(menu, "(XSOverlay) Send notifications about battery state",
+                (s, e) => ToggleSetting(() => Settings._config.xsOverlaySupport, val => Settings._config.xsOverlaySupport = val), Settings._config.xsOverlaySupport);
         }
 
-        private List<ContextMenuOption> settingsDropdownOptions = new List<ContextMenuOption>()
+        private void AddReceiveModeMenuItem(ContextMenu menu, string header, int mode, Action action)
         {
-            new ContextMenuOption()
+            BuildMenuItem(menu, header, (s, e) =>
             {
-                Name = "(Pico) Use Streaming Assistant",
-                Setting = Settings.Setting_UseStreamingApp,
-                Default = false,
+                OSC.Terminate();
+                PicoConnect.Terminate();
+                StreamingAssistant.Terminate();
+                Settings._config.receiveMode = mode;
+                UpdateInstanceSettings();
+                action();
+            }, Settings._config.receiveMode == mode);
+        }
 
-                CustomAction = () =>
-                {
-                    Settings.SetValue(Settings.Setting_UseStreamingApp, true);
+        private void BuildHeadsetSettingMenu(ContextMenu menu)
+        {
+            BuildMenuItem(menu, "(Streaming Assistant) Predict charging state",
+                (s, e) => ToggleSetting(() => Settings._config.predictCharging, val => Settings._config.predictCharging = val), Settings._config.predictCharging);
+            BuildMenuItem(menu, "Notify on low battery",
+                (s, e) => ToggleSetting(() => Settings._config.notifyOnHeadsetLowBattery, val => Settings._config.notifyOnHeadsetLowBattery = val), Settings._config.notifyOnHeadsetLowBattery);
+            BuildMenuItem(menu, "Notify on charge stop",
+                (s, e) => ToggleSetting(() => Settings._config.notifyOnHeadsetStopCharging, val => Settings._config.notifyOnHeadsetStopCharging = val), Settings._config.notifyOnHeadsetStopCharging);
+        }
 
-                    Instance.confirmedHeadsetPair = false;
-                    Instance.ShowStatusText();
-                    Instance.HideMainContent();
+        private void BuildControllerSettingMenu(ContextMenu menu)
+        {
+            BuildMenuItem(menu, "Notify on low battery",
+                (s, e) => ToggleSetting(() => Settings._config.notifyOnControllerLowBattery, val => Settings._config.notifyOnControllerLowBattery = val), Settings._config.notifyOnControllerLowBattery);
+        }
 
-                    OSC.Terminate();
+        private void UpdateInstanceSettings()
+        {
+            Instance.confirmedHeadsetPair = false;
+            Instance.ShowStatusText();
+            Instance.HideMainContent();
+        }
 
-                    Instance.InitStreamingAppListener();
-                }
-            },
-
-            new ContextMenuOption()
-            {
-                Name = "(Any) Use Headset application",
-                Setting = Settings.Setting_UseStreamingApp,
-                Mirror = true,
-
-                CustomAction = () =>
-                {
-                    Settings.SetValue(Settings.Setting_UseStreamingApp, false);
-
-                    Instance.confirmedHeadsetPair = false;
-                    Instance.ShowStatusText();
-                    Instance.HideMainContent();
-
-                    StreamingAssistant.Terminate();
-
-                    Instance.InitHeadsetListener();
-                }
-            },
-
-            new ContextMenuOption() { Name = "" },
-
-            new ContextMenuOption()
-            {
-                Name = "(OVR Toolkit) Send windows notifications about battery state",
-                Setting = Settings.Setting_OVRToolkitNotification,
-                Default = true,
-            },
-
-            new ContextMenuOption()
-            {
-                Name = "(XSOverlay) Send notifications about battery state",
-                Setting = Settings.Setting_XSOverlayNotification,
-                Default = true,
-            },
-        };
+        private void ToggleSetting(Func<bool> getSetting, Action<bool> setSetting)
+        {
+            setSetting(!getSetting());
+        }
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
             var contextMenu = new ContextMenu();
-
-            BuildContextMenu(contextMenu, settingsDropdownOptions);
-
+            BuildMainSettingMenu(contextMenu);
             contextMenu.IsOpen = true;
         }
 
-        private List<ContextMenuOption> headsetDropdownOptions = new List<ContextMenuOption>()
-        {
-            new ContextMenuOption()
-            {
-                Name = "(Streaming Assistant) Predict charging state",
-                Setting = Settings.Setting_PredictHeadsetCharge,
-                Default = true,
-
-                CustomCheck = () =>
-                {
-                    return Settings.GetValue<bool>(Settings.Setting_UseStreamingApp);
-                },
-            },
-
-            new ContextMenuOption()
-            {
-                Name = "Notify on low battery",
-                Setting = Settings.Setting_HeadsetNotifyLowBattery,
-                Default = true,
-            },
-
-            new ContextMenuOption()
-            {
-                Name = "Notify on charge stop",
-                Setting = Settings.Setting_HeadsetNotifyStopCharging,
-                Default = true,
-            },
-        };
         private void HeadsetDropDown_Click(object sender, RoutedEventArgs e)
         {
             var contextMenu = new ContextMenu();
-
-            BuildContextMenu(contextMenu, headsetDropdownOptions);
-
+            BuildHeadsetSettingMenu(contextMenu);
             contextMenu.IsOpen = true;
         }
 
-        private List<ContextMenuOption> controllerDropdownOptions = new List<ContextMenuOption>()
-        {
-            new ContextMenuOption()
-            {
-                Name = "Notify on low battery",
-                Setting = Settings.Setting_ControllersNotifyLowBattery,
-                Default = true
-            },
-        };
         private void ControllerDropDown_Click(object sender, RoutedEventArgs e)
         {
             var contextMenu = new ContextMenu();
-
-            BuildContextMenu(contextMenu, controllerDropdownOptions);
-
+            BuildControllerSettingMenu(contextMenu);
             contextMenu.IsOpen = true;
         }
+
     }
 }

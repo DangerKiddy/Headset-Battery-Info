@@ -61,7 +61,7 @@ namespace HeadsetBatteryInfo
 
             OnHeadsetBatteryLevelChanged(currentHeadsetLevel); // required for updating icon and letting vrc know about latest battery lvl
 
-            if (!isCharging && Settings.GetValue<bool>(Settings.Setting_HeadsetNotifyStopCharging, true) && previousHeadsetChargingState)
+            if (!isCharging && Settings._config.notifyOnHeadsetStopCharging && previousHeadsetChargingState)
             {
                 MainWindow.PlayBatteryStateSound();
 
@@ -84,7 +84,7 @@ namespace HeadsetBatteryInfo
             currentHeadsetLevel = level;
             MainWindow.SetDeviceBatteryLevel(DeviceType.Headset, currentHeadsetLevel, isHeadsetCharging);
 
-            if (level < lowBatteryPercent && Settings.GetValue<bool>(Settings.Setting_HeadsetNotifyLowBattery, true))
+            if (level < lowBatteryPercent && Settings._config.notifyOnHeadsetLowBattery)
             {
                 if (!notifiedAboutHeadsetLowBattery)
                     NotifyLowBattery(DeviceType.Headset);
@@ -131,7 +131,7 @@ namespace HeadsetBatteryInfo
         {
             var lowestLevel = Math.Min(currentControllerRightLevel, currentControllerLeftLevel);
 
-            if (lowestLevel < lowBatteryPercent && Settings.GetValue<bool>(Settings.Setting_ControllersNotifyLowBattery, true))
+            if (lowestLevel < lowBatteryPercent && Settings._config.notifyOnControllerLowBattery)
             {
                 if (!notifiedAboutControllerLowBattery)
                     NotifyLowBattery(DeviceType.ControllerLeft);

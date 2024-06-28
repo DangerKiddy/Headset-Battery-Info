@@ -8,8 +8,6 @@ namespace HeadsetBatteryInfo
 {
     internal class StreamingAssistant
     {
-        private static long batteryDischargeMaximumTime = 70000;
-
         private static Process streamingAssistant;
         private static IntPtr clientManagerPtr;
         private static IntPtr streamingAssistantHandle;
@@ -188,7 +186,7 @@ namespace HeadsetBatteryInfo
 
                     if (headsetBatteryLevel >= 0 && headsetBatteryLevel <= 100)
                     {
-                        if (Settings.GetValue<bool>(Settings.Setting_PredictHeadsetCharge))
+                        if (Settings._config.predictCharging)
                             PredictChargeState(headsetBatteryLevel);
 
                         MainWindow.Instance.OnReceiveBatteryLevel(headsetBatteryLevel, DeviceType.Headset);
@@ -204,7 +202,7 @@ namespace HeadsetBatteryInfo
         private static long lastBatteryChange = 0;
         private static int lastLevel = 0;
         private static long lastTimeDifference = 0;
-        private static void PredictChargeState(int currentBatteryLevel)
+        public static void PredictChargeState(int currentBatteryLevel)
         {
             var curTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             if (lastLevel != 0)
@@ -235,9 +233,9 @@ namespace HeadsetBatteryInfo
             lastLevel = currentBatteryLevel;
         }
 
-        private static bool IsCharging(long timeSinceLastChange, int batteryLevelDifference)
+        public static bool IsCharging(long timeSinceLastChange, int batteryLevelDifference)
         {
-            return timeSinceLastChange >= batteryDischargeMaximumTime || batteryLevelDifference <= 0;
+            return timeSinceLastChange >= Settings._config.batteryDischargeMaximumTime || batteryLevelDifference <= 0;
         }
 
         public static void Terminate()
