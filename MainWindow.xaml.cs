@@ -40,7 +40,7 @@ namespace HeadsetBatteryInfo
             ControllerRightDropDown.IsEnabled = false;
 
             if (Settings.GetValue<bool>("useStreamingApp"))
-                InitStreamingAppListener();
+                InitPicoConnectListener();
             else
                 InitHeadsetListener();
         }
@@ -203,6 +203,14 @@ namespace HeadsetBatteryInfo
 
             StreamingAssistant.Init();
             StreamingAssistant.StartListening();
+        }
+
+        private void InitPicoConnectListener()
+        {
+            SetStatusText("Waiting for Pico Connect app...");
+
+            PicoConnect.Init();
+            PicoConnect.StartListening();
         }
 
         bool isCallbackInitialized = false;
@@ -410,7 +418,7 @@ namespace HeadsetBatteryInfo
 
                     OSC.Terminate();
 
-                    Instance.InitStreamingAppListener();
+                    Instance.InitPicoConnectListener();
                 }
             },
 

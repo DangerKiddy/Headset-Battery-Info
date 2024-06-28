@@ -91,6 +91,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Overlay.cs" />
+    <Compile Include="PicoConnect.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="StreamingAssistant.cs" />
     <Page Include="MainWindow.xaml">
