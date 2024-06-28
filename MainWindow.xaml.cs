@@ -387,11 +387,15 @@ namespace HeadsetBatteryInfo
             {
                 Instance.InitHeadsetListener();
             });
+
             menu.Items.Add(new Separator());
+
             BuildMenuItem(menu, "(OVR Toolkit) Send windows notifications about battery state",
                 (s, e) => ToggleSetting(() => Settings._config.ovrToolkitSupport, val => Settings._config.ovrToolkitSupport = val), Settings._config.ovrToolkitSupport);
+
             BuildMenuItem(menu, "(XSOverlay) Send notifications about battery state",
                 (s, e) => ToggleSetting(() => Settings._config.xsOverlaySupport, val => Settings._config.xsOverlaySupport = val), Settings._config.xsOverlaySupport);
+
             BuildMenuItem(menu, "(VRChat) Send OSC data to VRChat",
                 (s, e) => ToggleSetting(() => Settings._config.enableOSC, val => Settings._config.enableOSC = val), Settings._config.enableOSC);
         }
