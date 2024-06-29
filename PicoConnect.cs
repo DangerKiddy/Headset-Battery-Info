@@ -47,8 +47,8 @@ namespace HeadsetBatteryInfo
                 else
                 { 
                     picoConnectAppFound = false;
-                    continue;
                 }
+
                 await Task.Delay(TimeSpan.FromMilliseconds(1000));
             }
         }
@@ -60,8 +60,11 @@ namespace HeadsetBatteryInfo
 
         private static async void Listen()
         {
+
             while (!isTeardown)
             {
+                await Task.Delay(TimeSpan.FromMilliseconds(3000));
+
                 if (!picoConnectAppFound)
                     continue;
 
@@ -91,9 +94,6 @@ namespace HeadsetBatteryInfo
                         MainWindow.Instance.OnReceiveBatteryLevel(battery.percentage, battery.deviceType);
                     }
                 }
-
-
-                await Task.Delay(TimeSpan.FromMilliseconds(3000));
             }
         }
 
