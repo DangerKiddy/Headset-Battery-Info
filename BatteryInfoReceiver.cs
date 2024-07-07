@@ -38,11 +38,11 @@ namespace HeadsetBatteryInfo
                     break;
 
                 case DeviceType.ControllerLeft:
-
+                    // Not implemented
                     break;
 
                 case DeviceType.ControllerRight:
-
+                    // Not implemented
                     break;
 
                 default:
@@ -57,7 +57,7 @@ namespace HeadsetBatteryInfo
         {
             isHeadsetCharging = isCharging;
 
-            OnHeadsetBatteryLevelChanged(currentHeadsetLevel); // required for updating icon and letting vrc know about latest battery lvl
+            OnHeadsetBatteryLevelChanged(currentHeadsetLevel); // required for updating icon and letting VRChat know about latest battery lvl
 
             if (!isCharging && Settings._config.notifyOnHeadsetStopCharging && previousHeadsetChargingState)
             {

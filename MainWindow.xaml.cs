@@ -12,6 +12,11 @@ namespace HeadsetBatteryInfo
     public partial class MainWindow : Window
     {
         public static MainWindow Instance { get; private set; }
+        public static BatteryTracking BatteryTracker { get; private set; }
+
+        private bool mainContentHidden = true;
+        private bool confirmedHeadsetPair = false;
+        private static SoundPlayer sound;
 
         public MainWindow()
         {
@@ -51,14 +56,6 @@ namespace HeadsetBatteryInfo
             }
         }
 
-        public static bool IsRunAsAdmin()
-        {
-            WindowsIdentity id = WindowsIdentity.GetCurrent();
-            WindowsPrincipal principal = new WindowsPrincipal(id);
-
-            return principal.IsInRole(WindowsBuiltInRole.Administrator);
-        }
-
         private void InitDefaultUiValues()
         {
             ControllerLeftBackground.Fill = DeviceIcons.GetGreyGradient();
@@ -81,7 +78,6 @@ namespace HeadsetBatteryInfo
             ControllerRight.Opacity = 0;
         }
 
-        bool confirmedHeadsetPair = false;
         private void ShowStatusText()
         {
             var showAnim = new DoubleAnimation();
@@ -104,12 +100,69 @@ namespace HeadsetBatteryInfo
             StatusText.BeginAnimation(OpacityProperty, hideAnim);
         }
 
+        private void TerminateBatteryTracker()
+        {
+            if (BatteryTracker != null)
+            {
+                BatteryTracker.Terminate();
+                BatteryTracker = null;
+
+                GC.Collect();
+            }
+        }
+
+        private void InitStreamingAppListener()
+        {
+            TerminateBatteryTracker();
+
+            if (!IsRunAsAdmin())
+            {
+                SetStatusText("Application must be ran as administrator!");
+
+                return;
+            }
+            SetStatusText("Waiting for streaming app...");
+
+            BatteryTracker = new StreamingAssistant();
+            BatteryTracker.Init();
+            BatteryTracker.StartListening();
+        }
+        public static bool IsRunAsAdmin()
+        {
+            WindowsIdentity id = WindowsIdentity.GetCurrent();
+            WindowsPrincipal principal = new WindowsPrincipal(id);
+
+            return principal.IsInRole(WindowsBuiltInRole.Administrator);
+        }
+
+        private void InitPicoConnectListener()
+        {
+            TerminateBatteryTracker();
+
+            SetStatusText("Waiting for Pico Connect app...");
+
+            BatteryTracker = new PicoConnect();
+            BatteryTracker.Init();
+            BatteryTracker.StartListening();
+        }
+
+        private void InitHeadsetListener()
+        {
+            TerminateBatteryTracker();
+
+            SetStatusText("Waiting for headset...");
+
+            BatteryTracker = new HeadsetListener();
+            BatteryTracker.Init();
+            BatteryTracker.StartListening();
+        }
+
         private static void UpdateDeviceUi(DeviceType device, int level, bool isCharging)
         {
             Rectangle progressBar = default;
             Rectangle background = default;
-            System.Windows.Controls.Button dropdown = default;
-            System.Windows.Controls.TextBlock text = default;
+            Button dropdown = default;
+            TextBlock text = default;
 
             switch (device)
             {
@@ -197,52 +250,7 @@ namespace HeadsetBatteryInfo
             Instance.ConfirmHeadsetPair();
         }
 
-        private void InitStreamingAppListener()
-        {
-            if (!IsRunAsAdmin())
-            {
-                SetStatusText("Application must be ran as administrator!");
-
-                return;
-            }
-            SetStatusText("Waiting for streaming app...");
-
-            StreamingAssistant.Init();
-            StreamingAssistant.StartListening();
-        }
-
-        private void InitPicoConnectListener()
-        {
-            SetStatusText("Waiting for Pico Connect app...");
-
-            PicoConnect.Init();
-            PicoConnect.StartListening();
-        }
-
-        bool isCallbackInitialized = false;
-        private void InitHeadsetListener()
-        {
-            SetStatusText("Waiting for headset...");
-
-            if (!isCallbackInitialized)
-            {
-                isCallbackInitialized = true;
-
-                OSC.AddReceiveHeadsetCallback(OnOSCReceiveHeadset);
-                OSC.AddReceiveBatteryLevelCallback(OnReceiveBatteryLevel);
-                OSC.AddReceiveBatteryStateCallback(OnReceiveBatteryState);
-                OSC.AddReceiveCompanyNameCallback(OnReceiveCompanyName);
-            }
-
-            OSC.StartListening();
-        }
-
-        private void OnOSCReceiveHeadset()
-        {
-            SetStatusText("Received headset, confirming...");
-        }
-
-        public void OnReceiveCompanyName(string company)
+        public void SetCompany(string company)
         {
             ConfirmHeadsetPair();
 
@@ -259,17 +267,7 @@ namespace HeadsetBatteryInfo
             ControllerRightIcon.Source = icons.rightController;
         }
 
-        public void OnReceiveBatteryLevel(int level, DeviceType device)
-        {
-            BatteryInfoReceiver.OnReceiveBatteryLevel(level, device);
-        }
-
-        public void OnReceiveBatteryState(bool isCharging, DeviceType device)
-        {
-            BatteryInfoReceiver.OnReceiveBatteryState(isCharging, device);
-        }
-
-        private void SetStatusText(string newStatus)
+        public void SetStatusText(string newStatus)
         {
             StatusText.Text = newStatus;
         }
@@ -283,7 +281,6 @@ namespace HeadsetBatteryInfo
             confirmedHeadsetPair = true;
         }
 
-        bool mainContentHidden = true;
         private void ShowMainContent()
         {
             if (!mainContentHidden)
@@ -328,7 +325,6 @@ namespace HeadsetBatteryInfo
             ControllerRight.BeginAnimation(OpacityProperty, showAnim);
         }
 
-        private static SoundPlayer sound;
         public static void PlayBatteryStateSound()
         {
             if (sound == null)
@@ -401,9 +397,9 @@ namespace HeadsetBatteryInfo
         {
             BuildMenuItem(menu, header, (s, e) =>
             {
+                TerminateBatteryTracker();
+
                 OSC.Terminate();
-                PicoConnect.Terminate();
-                StreamingAssistant.Terminate();
                 Settings._config.receiveMode = mode;
                 UpdateInstanceSettings();
                 action();

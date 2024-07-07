@@ -13,7 +13,6 @@ namespace HeadsetBatteryInfo
 
     internal class XSOverlay : IOverlay
     {
-
         public void SendNotification(string message)
         {
             new XSNotifier().SendNotification(new XSNotification()
@@ -65,7 +64,6 @@ namespace HeadsetBatteryInfo
             };
 
             byte[] buffer = GetPacketBytes(packet);
-
             OSC.SendBytesToPort(buffer, port);
         }
         private byte[] GetPacketBytes(DevicePacket packet)
@@ -84,6 +82,7 @@ namespace HeadsetBatteryInfo
             {
                 Marshal.FreeHGlobal(ptr);
             }
+
             return arr;
         }
     }

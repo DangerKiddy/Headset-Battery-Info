@@ -6,20 +6,18 @@ using System.Threading.Tasks;
 
 namespace HeadsetBatteryInfo
 {
-    internal class StreamingAssistant
+    internal class StreamingAssistant : BatteryTracking
     {
-        private static Process streamingAssistant;
-        private static IntPtr clientManagerPtr;
-        private static IntPtr streamingAssistantHandle;
-        private static IntPtr THREADSTACK0;
+        private Process streamingAssistant;
+        private IntPtr clientManagerPtr;
+        private IntPtr streamingAssistantHandle;
+        private IntPtr THREADSTACK0;
 
-        private static int[] offsets = { 0x28, 0x8, 0x10, 0x18, 0x8, 0x10 };
-        private static int headsetBatteryOffset = 0x64;
-        private static int leftControllerBatteryOffset = 0x68;
-        private static int rightControllerBatteryOffset = 0x6C;
+        private int[] offsets = { 0x28, 0x8, 0x10, 0x18, 0x8, 0x10 };
+        private int headsetBatteryOffset = 0x64;
+        private int leftControllerBatteryOffset = 0x68;
+        private int rightControllerBatteryOffset = 0x6C;
         
-        private static bool isActive = false;
-
         private enum ControllerBatteryLevel
         {
             NotConnected = 0,
@@ -30,7 +28,7 @@ namespace HeadsetBatteryInfo
             Full = 5
         }
 
-        private static Dictionary<ControllerBatteryLevel, int> batteryEnumToLevel = new Dictionary<ControllerBatteryLevel, int>()
+        private Dictionary<ControllerBatteryLevel, int> batteryEnumToLevel = new Dictionary<ControllerBatteryLevel, int>()
         {
             [ControllerBatteryLevel.NotConnected] = 0,
             [ControllerBatteryLevel.VeryLow] = 20,
@@ -40,12 +38,12 @@ namespace HeadsetBatteryInfo
             [ControllerBatteryLevel.Full] = 100,
         };
 
-        public static int GetHeadsetBattery()
+        private int GetHeadsetBattery()
         {
             return ReadInt32(clientManagerPtr + headsetBatteryOffset);
         }
 
-        private static int ConvertControllerBatteryToPercent(ControllerBatteryLevel batteryLevel)
+        private int ConvertControllerBatteryToPercent(ControllerBatteryLevel batteryLevel)
         {
             int percent;
 
@@ -55,7 +53,7 @@ namespace HeadsetBatteryInfo
             return percent;
         }
 
-        private static ControllerBatteryLevel GetControllerBatteryState(DeviceType controller)
+        private ControllerBatteryLevel GetControllerBatteryState(DeviceType controller)
         {
             if (controller == DeviceType.ControllerLeft)
                 return (ControllerBatteryLevel)ReadInt32(clientManagerPtr + leftControllerBatteryOffset);
@@ -63,7 +61,7 @@ namespace HeadsetBatteryInfo
                 return (ControllerBatteryLevel)ReadInt32(clientManagerPtr + rightControllerBatteryOffset);
         }
 
-        public static int GetLeftControllerBattery()
+        private int GetLeftControllerBattery()
         {
             ControllerBatteryLevel batteryState = GetControllerBatteryState(DeviceType.ControllerLeft);
             int batteryLevel = ConvertControllerBatteryToPercent(batteryState);
@@ -71,7 +69,7 @@ namespace HeadsetBatteryInfo
             return batteryLevel;
         }
 
-        public static int GetRightControllerBattery()
+        private int GetRightControllerBattery()
         {
             ControllerBatteryLevel batteryState = GetControllerBatteryState(DeviceType.ControllerRight);
             int batteryLevel = ConvertControllerBatteryToPercent(batteryState);
@@ -79,14 +77,12 @@ namespace HeadsetBatteryInfo
             return batteryLevel;
         }
 
-        public static async void Init()
+        public override async void Init()
         {
-            isActive = true;
-
             bool streamingAppFound = false;
             while (!streamingAppFound)
             {
-                if (!isActive || !MainWindow.IsRunAsAdmin())
+                if (!isTeardown || !MainWindow.IsRunAsAdmin())
                     break;
 
                 var processes = Process.GetProcessesByName("Streaming Assistant");
@@ -101,7 +97,7 @@ namespace HeadsetBatteryInfo
 
                     UpdateClientManagerPointer(threadstack0);
 
-                    MainWindow.Instance.OnReceiveCompanyName("pico");
+                    MainWindow.Instance.SetCompany("pico");
 
                     MainWindow.SetDeviceBatteryLevel(DeviceType.Headset, GetHeadsetBattery(), false);
                     MainWindow.SetDeviceBatteryLevel(DeviceType.ControllerLeft, GetLeftControllerBattery(), false);
@@ -113,7 +109,7 @@ namespace HeadsetBatteryInfo
                 await Task.Delay(TimeSpan.FromMilliseconds(1000));
             }
         }
-        private static void UpdateClientManagerPointer(IntPtr threadstack0)
+        private void UpdateClientManagerPointer(IntPtr threadstack0)
         {
             IntPtr curAdd = (IntPtr)ReadInt64(threadstack0 - 0x00000170);
             foreach (int x in offsets)
@@ -121,21 +117,21 @@ namespace HeadsetBatteryInfo
 
             clientManagerPtr = curAdd;
         }
-        private static int ReadInt32(IntPtr addr)
+        private int ReadInt32(IntPtr addr)
         {
             byte[] results = new byte[4];
             ReadProcessMemory(streamingAssistantHandle, addr, results, results.Length, out _);
 
             return BitConverter.ToInt32(results, 0);
         }
-        private static long ReadInt64(IntPtr addr)
+        private long ReadInt64(IntPtr addr)
         {
             byte[] results = new byte[8];
             ReadProcessMemory(streamingAssistantHandle, addr, results, results.Length, out _);
 
             return BitConverter.ToInt64(results, 0);
         }
-        private static Task<IntPtr> getThread0Address(Process process)
+        private Task<IntPtr> getThread0Address(Process process)
         {
             var proc = new Process
             {
@@ -165,87 +161,37 @@ namespace HeadsetBatteryInfo
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, [Out] byte[] lpBuffer, int dwSize, out int lpNumberOfBytesRead);
 
-        public static void StartListening()
+        protected override async Task Listen()
         {
-            Listen();
-        }
+            // Not completely sure, but if not updating pointers every X calls then it breaks and reads all numbers as zero
+            UpdateClientManagerPointer(THREADSTACK0);
 
-        private static async void Listen()
-        {
-            while (true)
+            if (clientManagerPtr != IntPtr.Zero)
             {
-                if (!isActive)
-                    break;
+                int headsetBatteryLevel = GetHeadsetBattery();
 
-                // Not completely sure, but if not updating pointers every X calls then it breaks and reads all numbers zero
-                UpdateClientManagerPointer(THREADSTACK0);
-
-                if (clientManagerPtr != IntPtr.Zero)
+                if (headsetBatteryLevel >= 0 && headsetBatteryLevel <= 100)
                 {
-                    int headsetBatteryLevel = GetHeadsetBattery();
+                    if (Settings._config.predictCharging)
+                        PredictChargeState(headsetBatteryLevel);
 
-                    if (headsetBatteryLevel >= 0 && headsetBatteryLevel <= 100)
-                    {
-                        if (Settings._config.predictCharging)
-                            PredictChargeState(headsetBatteryLevel);
-
-                        MainWindow.Instance.OnReceiveBatteryLevel(headsetBatteryLevel, DeviceType.Headset);
-                        MainWindow.Instance.OnReceiveBatteryLevel(GetLeftControllerBattery(), DeviceType.ControllerLeft);
-                        MainWindow.Instance.OnReceiveBatteryLevel(GetRightControllerBattery(), DeviceType.ControllerRight);
-                    }
-                }
-
-                await Task.Delay(TimeSpan.FromMilliseconds(3000));
-            }
-        }
-
-        private static long lastBatteryChange = 0;
-        private static int lastLevel = 0;
-        private static long lastTimeDifference = 0;
-        public static void PredictChargeState(int currentBatteryLevel)
-        {
-            var curTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-            if (lastLevel != 0)
-            {
-                var timeSinceLastChange = curTime - lastBatteryChange;
-                if (lastLevel != currentBatteryLevel)
-                {
-                    var batteryLevelDifference = lastLevel - currentBatteryLevel;
-                    lastBatteryChange = curTime;
-
-                    lastTimeDifference = timeSinceLastChange;
-
-                    bool isCharging = IsCharging(timeSinceLastChange, batteryLevelDifference);
-
-                    MainWindow.Instance.OnReceiveBatteryState(isCharging, DeviceType.Headset);
-                }
-
-                if (lastTimeDifference != 0 && !BatteryInfoReceiver.IsHeadsetCharging() && IsCharging(timeSinceLastChange, 1))
-                {
-                    MainWindow.Instance.OnReceiveBatteryState(true, DeviceType.Headset);
+                    BatteryInfoReceiver.OnReceiveBatteryLevel(headsetBatteryLevel, DeviceType.Headset);
+                    BatteryInfoReceiver.OnReceiveBatteryLevel(GetLeftControllerBattery(), DeviceType.ControllerLeft);
+                    BatteryInfoReceiver.OnReceiveBatteryLevel(GetRightControllerBattery(), DeviceType.ControllerRight);
                 }
             }
-            else
-            {
-                lastBatteryChange = curTime;
-            }
 
-            lastLevel = currentBatteryLevel;
+            await Task.Delay(TimeSpan.FromMilliseconds(3000));
         }
 
-        public static bool IsCharging(long timeSinceLastChange, int batteryLevelDifference)
+        public override void Terminate()
         {
-            return timeSinceLastChange >= Settings._config.batteryDischargeMaximumTime || batteryLevelDifference <= 0;
-        }
+            base.Terminate();
 
-        public static void Terminate()
-        {
             streamingAssistant = null;
             clientManagerPtr = IntPtr.Zero;
             streamingAssistantHandle = IntPtr.Zero;
             THREADSTACK0 = IntPtr.Zero;
-
-            isActive = false;
         }
     }
 }

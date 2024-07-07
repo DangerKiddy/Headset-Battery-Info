@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace HeadsetBatteryInfo
 {
-    internal class PicoConnect
+    internal class PicoConnect : BatteryTracking
     {
         private enum Side
         {
@@ -24,24 +24,19 @@ namespace HeadsetBatteryInfo
             public int percentage { get; set; }
         }
 
-        private static readonly string fileName = "pico_connect*.log";
-        private static readonly string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PICO Connect\\logs");
+        private const string fileName = "pico_connect*.log";
+        private readonly string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PICO Connect\\logs");
 
-        private static bool picoConnectAppFound = false;
-
-        private static bool isTeardown = true;
-
-        public static async void Init()
+        private bool picoConnectAppFound = false;
+        public override async void Init()
         {
-            isTeardown = false;
-            
             while (!isTeardown)
             {
                 var processes = Process.GetProcessesByName("PICO Connect");
 
                 if (processes.Length > 0)
                 {
-                    MainWindow.Instance.OnReceiveCompanyName("pico");
+                    MainWindow.Instance.SetCompany("pico");
                     picoConnectAppFound = true;
                 }
                 else
@@ -53,51 +48,55 @@ namespace HeadsetBatteryInfo
             }
         }
 
-        public static void StartListening()
+        protected override async Task Listen()
         {
-            Listen();
-        }
+            await Task.Delay(TimeSpan.FromMilliseconds(3000));
 
-        private static async void Listen()
-        {
+            if (!CanListen())
+                return;
 
-            while (!isTeardown)
+            var batteryInfo = await GetBatteryInfo();
+            foreach (var battery in batteryInfo)
             {
-                await Task.Delay(TimeSpan.FromMilliseconds(3000));
+                if (Settings._config.predictCharging && battery.deviceType == DeviceType.Headset)
+                    PredictChargeState(battery.percentage);
 
-                if (!picoConnectAppFound)
-                    continue;
-
-                string file = GetLatestFileName(path, fileName);
-                if (!File.Exists(file))
-                    continue;
-
-                var batteryInfo = await Task.Run(BatteryInfoCallback[]() =>
+                if (battery.deviceType == DeviceType.ControllerLeft)
                 {
-                    return ParseLog(file);
-                });
-
-                if (batteryInfo.Length == 0)
-                    continue;
-
-                foreach (var battery in batteryInfo)
+                    BatteryInfoReceiver.OnReceiveBatteryLevel(battery.percentage, battery.side == Side.Left ? DeviceType.ControllerLeft : DeviceType.ControllerRight);
+                }
+                else
                 {
-                    if (Settings._config.predictCharging && battery.deviceType == DeviceType.Headset)
-                        StreamingAssistant.PredictChargeState(battery.percentage);
-
-                    if (battery.deviceType == DeviceType.ControllerLeft)
-                    {
-                        MainWindow.Instance.OnReceiveBatteryLevel(battery.percentage, battery.side == Side.Left ? DeviceType.ControllerLeft : DeviceType.ControllerRight);
-                    }
-                    else
-                    {
-                        MainWindow.Instance.OnReceiveBatteryLevel(battery.percentage, battery.deviceType);
-                    }
+                    BatteryInfoReceiver.OnReceiveBatteryLevel(battery.percentage, battery.deviceType);
                 }
             }
         }
 
-        private static BatteryInfoCallback[] ParseLog(string fileName)
+        private bool CanListen()
+        {
+            if (isTeardown || !picoConnectAppFound)
+                return false;
+
+            return true;
+        }
+
+        private async Task<BatteryInfoCallback[]> GetBatteryInfo()
+        {
+            var batteryInfo = new BatteryInfoCallback[0];
+
+            string file = GetLatestFileName(path, fileName);
+            if (!File.Exists(file))
+                return batteryInfo;
+
+            await Task.Run(() =>
+            {
+                batteryInfo = ParseLog(file);
+            });
+
+            return batteryInfo;
+        }
+
+        private BatteryInfoCallback[] ParseLog(string fileName)
         {
             using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
@@ -129,7 +128,7 @@ namespace HeadsetBatteryInfo
             public DateTime FileCreateTime;
         }
 
-        private static string GetLatestFileName(string path, string fileName)
+        private string GetLatestFileName(string path, string fileName)
         {
             DirectoryInfo d = new DirectoryInfo(path);
             List<FileTimeInfo> list = new List<FileTimeInfo>();
@@ -147,11 +146,6 @@ namespace HeadsetBatteryInfo
                       select x;
 
             return qry.LastOrDefault().FileName;
-        }
-
-        public static void Terminate()
-        {
-            isTeardown = true;
         }
     }
 }

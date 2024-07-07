@@ -43,32 +43,16 @@ namespace HeadsetBatteryInfo
         }
 
         public delegate void receiveHeadset();
-        private static receiveHeadset onReceiveHeadset;
-        public static void AddReceiveHeadsetCallback(receiveHeadset callback)
-        {
-            onReceiveHeadset += callback;
-        }
+        public static receiveHeadset OnReceiveHeadset;
 
         public delegate void receiveBatteryLevel(int level, DeviceType device);
-        private static receiveBatteryLevel onReceiveBatteryLevel;
-        public static void AddReceiveBatteryLevelCallback(receiveBatteryLevel callback)
-        {
-            onReceiveBatteryLevel += callback;
-        }
+        public static receiveBatteryLevel OnReceiveBatteryLevel;
 
         public delegate void receiveBatteryState(bool isCharging, DeviceType device);
-        private static receiveBatteryState onReceiveBatteryState;
-        public static void AddReceiveBatteryStateCallback(receiveBatteryState callback)
-        {
-            onReceiveBatteryState += callback;
-        }
+        public static receiveBatteryState OnReceiveBatteryState;
 
         public delegate void receiveCompanyName(string company);
-        private static receiveCompanyName onReceiveCompanyName;
-        public static void AddReceiveCompanyNameCallback(receiveCompanyName callback)
-        {
-            onReceiveCompanyName += callback;
-        }
+        public static receiveCompanyName OnReceiveCompanyName;
 
         public static void StartListening()
         {
@@ -118,24 +102,27 @@ namespace HeadsetBatteryInfo
                             var buffer = Encoding.ASCII.GetBytes(sendBack);
                             udp.Send(buffer, buffer.Length, headsetEndPoint);
 
-                            onReceiveHeadset();
+                            OnReceiveHeadset();
 
                             break;
 
                         case "/battery/headset/company":
-                            onReceiveCompanyName((string)msg.value);
+                            if (OnReceiveCompanyName != null)
+                                OnReceiveCompanyName((string)msg.value);
 
                             break;
 
                         case "/battery/headset/level":
                             var batteryLevel = (int)msg.value;
-                            onReceiveBatteryLevel(batteryLevel, DeviceType.Headset);
+                            if (OnReceiveBatteryLevel != null)
+                                OnReceiveBatteryLevel(batteryLevel, DeviceType.Headset);
 
                             break;
 
                         case "/battery/headset/charging":
                             var isHeadsetCharging = (bool)msg.value;
-                            onReceiveBatteryState(isHeadsetCharging, DeviceType.Headset);
+                            if (OnReceiveBatteryState != null)
+                                OnReceiveBatteryState(isHeadsetCharging, DeviceType.Headset);
 
                             break;
 
