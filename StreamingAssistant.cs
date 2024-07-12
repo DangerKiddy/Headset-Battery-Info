@@ -79,6 +79,8 @@ namespace HeadsetBatteryInfo
 
         public override async void Init()
         {
+            base.Init();
+
             bool streamingAppFound = false;
             while (!streamingAppFound)
             {
@@ -175,9 +177,16 @@ namespace HeadsetBatteryInfo
                     if (Settings._config.predictCharging)
                         PredictChargeState(headsetBatteryLevel);
 
+                    int leftControllerBatteryLevel = GetLeftControllerBattery();
+                    int rightControllerBatteryLevel = GetRightControllerBattery();
+
                     BatteryInfoReceiver.OnReceiveBatteryLevel(headsetBatteryLevel, DeviceType.Headset);
-                    BatteryInfoReceiver.OnReceiveBatteryLevel(GetLeftControllerBattery(), DeviceType.ControllerLeft);
-                    BatteryInfoReceiver.OnReceiveBatteryLevel(GetRightControllerBattery(), DeviceType.ControllerRight);
+                    BatteryInfoReceiver.OnReceiveBatteryLevel(leftControllerBatteryLevel, DeviceType.ControllerLeft);
+                    BatteryInfoReceiver.OnReceiveBatteryLevel(rightControllerBatteryLevel, DeviceType.ControllerRight);
+
+                    SetBattery(DeviceType.Headset, headsetBatteryLevel);
+                    SetBattery(DeviceType.ControllerLeft, leftControllerBatteryLevel);
+                    SetBattery(DeviceType.ControllerRight, rightControllerBatteryLevel);
                 }
             }
 

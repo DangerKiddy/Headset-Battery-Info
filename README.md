@@ -22,10 +22,17 @@ And then you can open your Streaming Assistant and pair your headset (if you did
 ![2](https://github.com/DangerKiddy/Headset-Battery-Info/assets/42438297/06581a82-6766-4a53-9551-79f9150c6f6a)
 
 # OSC
-Application sends OSC messages with current battery info to VRChat (port 9000)
+## Outputs
+Application sends OSC messages with current battery info to VRChat (port 9000 by default)
 | Address | Animator Parameter | Value Type |
 | ------- | ------------------ | ---------- |
 | /avatar/parameters/controllerLeftBatteryLevel | controllerLeftBatteryLevel | float `0.0 - 1.0` |
 | /avatar/parameters/controllerRightBatteryLevel | controllerRightBatteryLevel | float `0.0 - 1.0` |
 | /avatar/parameters/headsetBatteryLevel | headsetBatteryLevel | float `0.0 - 1.0` |
 | /avatar/parameters/isHeadsetCharging | isHeadsetCharging | bool `False / True` |
+
+## Inputs
+Application can also receive OSC messages on 28092 port, currently available only one option
+| Address | Description | Value Type |
+| ------- | ----------- | ---------- |
+| /hbi/requestUpdate | Forces HBI to re-send current battery info to VRChat(port 9000 by default) and overlay application (such as OVR Toolkit) | None |

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -126,6 +127,12 @@ namespace HeadsetBatteryInfo
 
                             break;
 
+                        case "/hbi/requestUpdate":
+                            if (MainWindow.BatteryTracker != null)
+                                MainWindow.BatteryTracker.ForceSendData();
+
+                            break;
+
                         default:
                             break;
                     }
@@ -217,7 +224,15 @@ namespace HeadsetBatteryInfo
 
             // checking for ',' char
             if (buffer[bufferPosition] != 44)
+            {
+                if (bufferPosition == buffer.Length-1)
+                {
+                    msg.success = true;
+                    msg.value = true;
+                }
+
                 return msg;
+            }
             bufferPosition++; // skipping ',' character
 
             char valueType = (char)buffer[bufferPosition];

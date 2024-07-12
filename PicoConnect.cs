@@ -30,6 +30,8 @@ namespace HeadsetBatteryInfo
         private bool picoConnectAppFound = false;
         public override async void Init()
         {
+            base.Init();
+
             while (!isTeardown)
             {
                 var processes = Process.GetProcessesByName("PICO Connect");
@@ -38,10 +40,8 @@ namespace HeadsetBatteryInfo
                 {
                     MainWindow.Instance.SetCompany("pico");
                     picoConnectAppFound = true;
-                }
-                else
-                { 
-                    picoConnectAppFound = false;
+
+                    break;
                 }
 
                 await Task.Delay(TimeSpan.FromMilliseconds(1000));
@@ -69,6 +69,8 @@ namespace HeadsetBatteryInfo
                 {
                     BatteryInfoReceiver.OnReceiveBatteryLevel(battery.percentage, battery.deviceType);
                 }
+
+                SetBattery(battery.deviceType, battery.percentage, battery.deviceType == DeviceType.Headset ? -1 : 0);
             }
         }
 
@@ -146,6 +148,13 @@ namespace HeadsetBatteryInfo
                       select x;
 
             return qry.LastOrDefault().FileName;
+        }
+
+        public override void Terminate()
+        {
+            base.Terminate();
+
+            picoConnectAppFound = false;
         }
     }
 }

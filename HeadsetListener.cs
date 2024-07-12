@@ -7,6 +7,8 @@ namespace HeadsetBatteryInfo
     {
         public override void Init()
         {
+            base.Init();
+
             OSC.OnReceiveHeadset += OnOSCReceiveHeadset;
             OSC.OnReceiveBatteryLevel += OnReceiveBatteryLevel;
             OSC.OnReceiveBatteryState += OnReceiveBatteryState;
@@ -21,10 +23,14 @@ namespace HeadsetBatteryInfo
         private void OnReceiveBatteryLevel(int level, DeviceType device)
         {
             BatteryInfoReceiver.OnReceiveBatteryLevel(level, device);
+
+            SetBattery(device, level);
         }
         private void OnReceiveBatteryState(bool isCharging, DeviceType device)
         {
             BatteryInfoReceiver.OnReceiveBatteryState(isCharging, device);
+
+            SetBattery(device, -1, isCharging);
         }
         private void OnReceiveCompanyName(string companyName)
         {
