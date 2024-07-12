@@ -30,12 +30,21 @@ namespace HeadsetBatteryInfo
         public static void Load()
         {
             if (!File.Exists(fileName))
-            {
-                File.Create(fileName).Close();
-                File.WriteAllText(fileName, JsonSerializer.Serialize(_config, new JsonSerializerOptions { WriteIndented = true }));
-            }
+                CreateNewConfig();
 
-            _config = JsonSerializer.Deserialize<Config>(File.ReadAllText(fileName));
+            try
+            {
+                _config = JsonSerializer.Deserialize<Config>(File.ReadAllText(fileName));
+            }
+            catch
+            {
+                CreateNewConfig();
+            }
+        }
+
+        private static void CreateNewConfig()
+        {
+            File.WriteAllText(fileName, JsonSerializer.Serialize(_config, new JsonSerializerOptions { WriteIndented = true }));
         }
     }
 }
