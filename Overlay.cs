@@ -1,7 +1,7 @@
 ﻿using System;
 using XSNotifications;
 using System.Runtime.InteropServices;
-using Microsoft.Toolkit.Uwp.Notifications;
+using System.Text;
 
 namespace HeadsetBatteryInfo
 {
@@ -47,10 +47,8 @@ namespace HeadsetBatteryInfo
 
         public void SendNotification(string message)
         {
-            new ToastContentBuilder()
-                .AddText("Headset Battery Info")
-                .AddText(message)
-                .Show();
+            var buffer = Encoding.ASCII.GetBytes($"/notification/{message}");
+            OSC.SendBytesToPort(buffer, port);
         }
 
         public void UpdateWristInfo(DeviceType device, int batteryLevel, bool batteryState)

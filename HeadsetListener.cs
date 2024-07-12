@@ -25,8 +25,6 @@ namespace HeadsetBatteryInfo
         private void OnReceiveBatteryState(bool isCharging, DeviceType device)
         {
             BatteryInfoReceiver.OnReceiveBatteryState(isCharging, device);
-
-            Trace.WriteLine($"Received {isCharging}");
         }
         private void OnReceiveCompanyName(string companyName)
         {

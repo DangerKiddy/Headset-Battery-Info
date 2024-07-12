@@ -2,6 +2,8 @@
 using System.Drawing.Imaging;
 using System.IO;
 using System.Windows.Media;
+using System;
+using System.Windows;
 
 namespace HeadsetBatteryInfo
 {
@@ -104,12 +106,23 @@ namespace HeadsetBatteryInfo
             var leftControllerName = singleControllerImage ? "controller" : "left_controller";
             var rightControllerName = singleControllerImage ? "controller" : "right_controller";
 
-            icons.headset = ConvertBitmapToImageSource(new System.Drawing.Bitmap($"Assets/Images/{folder}/headset.png")) as BitmapSource;
-            icons.leftController = ConvertBitmapToImageSource(new System.Drawing.Bitmap($"Assets/Images/{folder}/{leftControllerName}.png")) as BitmapSource;
-            icons.rightController = ConvertBitmapToImageSource(new System.Drawing.Bitmap($"Assets/Images/{folder}/{rightControllerName}.png")) as BitmapSource;
+            icons.headset = ConvertBitmapToImageSource(GetImageBitmap($"Assets/Images/{folder}/headset.png")) as BitmapSource;
+            icons.leftController = ConvertBitmapToImageSource(GetImageBitmap($"Assets/Images/{folder}/{leftControllerName}.png")) as BitmapSource;
+            icons.rightController = ConvertBitmapToImageSource(GetImageBitmap($"Assets/Images/{folder}/{rightControllerName}.png")) as BitmapSource;
 
-            icons.headsetCharging = ConvertBitmapToImageSource(new System.Drawing.Bitmap($"Assets/Images/{folder}/headset_charging.png")) as BitmapSource;
-            icons.companyLogo = ConvertBitmapToImageSource(new System.Drawing.Bitmap($"Assets/Images/{folder}/logo.png"));
+            icons.headsetCharging = ConvertBitmapToImageSource(GetImageBitmap($"Assets/Images/{folder}/headset_charging.png")) as BitmapSource;
+            icons.companyLogo = ConvertBitmapToImageSource(GetImageBitmap($"Assets/Images/{folder}/logo.png"));
+        }
+
+        private static System.Drawing.Bitmap GetImageBitmap(string path)
+        {
+            return new System.Drawing.Bitmap(GetImageFileStream(path));
+        }
+
+        private static Stream GetImageFileStream(string path)
+        {
+            System.Windows.Resources.StreamResourceInfo res = Application.GetResourceStream(new Uri(path, UriKind.RelativeOrAbsolute));
+            return res.Stream;
         }
 
         private static void InitGradient()
