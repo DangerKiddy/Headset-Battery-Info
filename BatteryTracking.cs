@@ -47,7 +47,7 @@ namespace HeadsetBatteryInfo
         }
         protected virtual async Task Listen()
         {
-            await Task.Delay(1000);
+            
         }
 
         protected void PredictChargeState(int currentBatteryLevel)
@@ -63,13 +63,13 @@ namespace HeadsetBatteryInfo
 
                     predictionLastTimeDifference = timeSinceLastChange;
 
-                    bool isCharging = IsCharging(timeSinceLastChange, batteryLevelDifference);
+                    bool isCharging = PredictIsCharging(timeSinceLastChange, batteryLevelDifference);
 
                     BatteryInfoReceiver.OnReceiveBatteryState(isCharging, DeviceType.Headset);
                     SetBattery(DeviceType.Headset, -1, isCharging);
                 }
 
-                if (predictionLastTimeDifference != 0 && !BatteryInfoReceiver.IsHeadsetCharging() && IsCharging(timeSinceLastChange, 1))
+                if (predictionLastTimeDifference != 0 && !BatteryInfoReceiver.IsHeadsetCharging() && PredictIsCharging(timeSinceLastChange, 1))
                 {
                     BatteryInfoReceiver.OnReceiveBatteryState(true, DeviceType.Headset);
                     SetBattery(DeviceType.Headset, -1, true);
@@ -83,7 +83,7 @@ namespace HeadsetBatteryInfo
             predictionLastLevel = currentBatteryLevel;
         }
 
-        public static bool IsCharging(long timeSinceLastChange, int batteryLevelDifference)
+        public static bool PredictIsCharging(long timeSinceLastChange, int batteryLevelDifference)
         {
             return timeSinceLastChange >= Settings._config.batteryDischargeMaximumTime || batteryLevelDifference <= 0;
         }
