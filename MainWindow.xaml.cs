@@ -416,6 +416,9 @@ namespace HeadsetBatteryInfo
 
             BuildMenuItem(menu, "Notify on charge stop",
                 (s, e) => ToggleSetting(() => Settings._config.notifyOnHeadsetStopCharging, val => Settings._config.notifyOnHeadsetStopCharging = val), Settings._config.notifyOnHeadsetStopCharging);
+
+            BuildMenuItem(menu, $"Repetitive notification when charging stopped (every {Math.Round(Settings._config.repetitiveMillisecondPeriod / 60000f)} minute(s))",
+                (s, e) => ToggleSetting(() => Settings._config.enableRepetitiveNotification, val => Settings._config.enableRepetitiveNotification = val), Settings._config.enableRepetitiveNotification);
         }
 
         private void BuildControllerSettingMenu(ContextMenu menu)

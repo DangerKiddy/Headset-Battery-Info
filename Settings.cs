@@ -17,7 +17,9 @@ namespace HeadsetBatteryInfo
             enableOSC = true,
             OSCport = 9000,
             batteryDischargeMaximumTime = 70000,
-            lowBatteryNotifyLevel = 30
+            lowBatteryNotifyLevel = 30,
+            enableRepetitiveNotification = false,
+            repetitiveMillisecondPeriod = 600000,
         };
 
         private static readonly string fileName = "settings.json";
@@ -35,6 +37,9 @@ namespace HeadsetBatteryInfo
             try
             {
                 _config = JsonSerializer.Deserialize<Config>(File.ReadAllText(fileName));
+
+                if (_config.repetitiveMillisecondPeriod == 0)
+                    _config.repetitiveMillisecondPeriod = 600000;
             }
             catch
             {

@@ -13,5 +13,7 @@
         public int OSCport { get; set; }
         public int batteryDischargeMaximumTime { get; set; }
         public int lowBatteryNotifyLevel { get; set; }
+        public bool enableRepetitiveNotification { get; set; }
+        public int repetitiveMillisecondPeriod { get; set; }
     }
 }

@@ -19,6 +19,8 @@ namespace HeadsetBatteryInfo
         private static int predictionLastLevel = 0;
         private static long predictionLastTimeDifference = 0;
 
+        private static long continiousNotificationNextCall = 0;
+
         private BatteryInfo currentHeadsetBatteryInfo;
         private BatteryInfo currentLeftControllerBatteryInfo;
         private BatteryInfo currentRightControllerBatteryInfo;
@@ -47,7 +49,24 @@ namespace HeadsetBatteryInfo
         }
         protected virtual async Task Listen()
         {
-            
+            if (!IsCharging() && Settings._config.enableRepetitiveNotification)
+                RepetitiveNotification();
+            else
+                continiousNotificationNextCall = 0;
+        }
+
+        private void RepetitiveNotification()
+        {
+            var curTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            if (continiousNotificationNextCall == 0 || curTime >= continiousNotificationNextCall)
+            {
+                if (continiousNotificationNextCall != 0)
+                {
+                    MainWindow.PlayBatteryStateSound();
+                }
+
+                continiousNotificationNextCall = curTime + Settings._config.repetitiveMillisecondPeriod;
+            }
         }
 
         protected void PredictChargeState(int currentBatteryLevel)
@@ -120,6 +139,11 @@ namespace HeadsetBatteryInfo
                     BatteryInfoReceiver.OnReceiveBatteryState(info.IsCharging, device);
                 }
             }
+        }
+
+        public bool IsCharging(DeviceType device = DeviceType.Headset)
+        {
+            return batteryInfos[device].IsCharging;
         }
 
         public virtual void Terminate()

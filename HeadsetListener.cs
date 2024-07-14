@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace HeadsetBatteryInfo
 {
@@ -46,6 +47,13 @@ namespace HeadsetBatteryInfo
             OSC.OnReceiveBatteryLevel -= OnReceiveBatteryLevel;
             OSC.OnReceiveBatteryState -= OnReceiveBatteryState;
             OSC.OnReceiveCompanyName -= OnReceiveCompanyName;
+        }
+
+        protected override async Task Listen()
+        {
+            await base.Listen();
+
+            await Task.Delay(1000);
         }
     }
 }
