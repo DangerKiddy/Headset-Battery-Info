@@ -11,6 +11,15 @@ namespace HeadsetBatteryInfo
 {
     internal class PicoConnect : BatteryTracking
     {
+
+        private class BatteryConnect
+        {
+            public string deviceType { get; set; }
+            public string side { get; set; }
+            public bool active { get; set; }
+            public int percentage { get; set; }
+        }
+
         private enum Side
         {
             Left,
@@ -19,12 +28,13 @@ namespace HeadsetBatteryInfo
         private class BatteryInfoCallback
         {
             public DeviceType deviceType { get; set; }
-            public Side side { get; set; }
+            public Side? side { get; set; }
             public bool active { get; set; }
             public int percentage { get; set; }
         }
 
         private const string fileName = "pico_connect*.log";
+        private readonly string fileNameRegex = @"^pico_connect(?:\d*)\.log$";
         private readonly string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PICO Connect\\logs");
 
         private bool picoConnectAppFound = false;
@@ -114,7 +124,43 @@ namespace HeadsetBatteryInfo
                     if (s.Contains("update battery info callback"))
                     {
                         var res = Regex.Match(s, pattern).Result("$2");
-                        BatteryInfoCallback[] info = JsonSerializer.Deserialize<BatteryInfoCallback[]>(res);
+                        Console.WriteLine(res);
+                        if (res == null || res == string.Empty) { continue; }
+                        BatteryConnect[] batteryStats = JsonSerializer.Deserialize<BatteryConnect[]>(res);
+                        
+                        if (batteryStats == null) { continue; }
+
+                        BatteryInfoCallback[] info = new BatteryInfoCallback[batteryStats.Length];
+                        
+                        for (int j = 0; j < batteryStats.Length; j++)
+                        {
+                            var batteryStat = batteryStats[j];
+                            if (batteryStat == null) { continue; }
+                            if (batteryStat.deviceType == null) { continue; }
+
+                            info[j] = new BatteryInfoCallback(){};
+                            info[j].percentage = batteryStat.percentage;
+                            info[j].active = batteryStat.active;
+                            
+                            if (batteryStat.deviceType == "kDeviceTypeHead")
+                            {
+                                info[j].deviceType = DeviceType.Headset;
+                                info[j].side = null;
+                            }
+                            else if (batteryStat.deviceType == "kDeviceTypeHandController")
+                            {
+                                if (batteryStat.side == "kSideLeft")
+                                {
+                                    info[j].deviceType = DeviceType.ControllerLeft;
+                                    info[j].side = Side.Left;
+                                }
+                                else if (batteryStat.side == "kSideRight")
+                                {
+                                    info[j].deviceType = DeviceType.ControllerRight;
+                                    info[j].side = Side.Right;
+                                }
+                            }
+                        }
 
                         return info;
                     }
@@ -134,19 +180,22 @@ namespace HeadsetBatteryInfo
         {
             DirectoryInfo d = new DirectoryInfo(path);
             List<FileTimeInfo> list = new List<FileTimeInfo>();
-
-            foreach (FileInfo file in d.GetFiles(fileName))
+            
+            Regex regex = new Regex(fileNameRegex, RegexOptions.IgnoreCase);
+            foreach (FileInfo file in d.GetFiles())
             {
-                list.Add(new FileTimeInfo()
+                if (regex.IsMatch(file.Name))
                 {
-                    FileName = file.FullName,
-                    FileCreateTime = file.CreationTime
-                });
+                    list.Add(new FileTimeInfo()
+                    {
+                        FileName = file.FullName,
+                        FileCreateTime = file.CreationTime
+                    });
+                }
             }
             var qry = from x in list
                       orderby x.FileCreateTime
                       select x;
-
             return qry.LastOrDefault().FileName;
         }
 
