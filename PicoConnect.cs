@@ -112,7 +112,6 @@ namespace HeadsetBatteryInfo
         {
             using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
-                BatteryInfoCallback[] percentage = new BatteryInfoCallback[3];
                 StreamReader sr = new StreamReader(fs);
                 string[] strings = sr.ReadToEnd().Split('\n');
 
@@ -124,19 +123,19 @@ namespace HeadsetBatteryInfo
                     if (s.Contains("update battery info callback"))
                     {
                         var res = Regex.Match(s, pattern).Result("$2");
-                        Console.WriteLine(res);
-                        if (res == null || res == string.Empty) { continue; }
-                        BatteryConnect[] batteryStats = JsonSerializer.Deserialize<BatteryConnect[]>(res);
+                        if (res == null || res == string.Empty)
+                            continue;
                         
-                        if (batteryStats == null) { continue; }
+                        BatteryConnect[] batteryStats = JsonSerializer.Deserialize<BatteryConnect[]>(res);
+                        if (batteryStats == null)
+                            continue;
 
                         BatteryInfoCallback[] info = new BatteryInfoCallback[batteryStats.Length];
-                        
                         for (int j = 0; j < batteryStats.Length; j++)
                         {
                             var batteryStat = batteryStats[j];
-                            if (batteryStat == null) { continue; }
-                            if (batteryStat.deviceType == null) { continue; }
+                            if (batteryStat == null || batteryStat.deviceType == null)
+                                continue;
 
                             info[j] = new BatteryInfoCallback(){};
                             info[j].percentage = batteryStat.percentage;
@@ -166,7 +165,7 @@ namespace HeadsetBatteryInfo
                     }
                 }
                 
-                return percentage;
+                return new BatteryInfoCallback[3];
             }
         }
 
