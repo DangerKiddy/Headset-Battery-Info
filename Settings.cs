@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text.Json;
 
 namespace HeadsetBatteryInfo
@@ -22,21 +23,21 @@ namespace HeadsetBatteryInfo
             repetitiveMillisecondPeriod = 600000,
         };
 
-        private static readonly string fileName = "settings.json";
+        private static readonly string filePath = Path.Combine(AppContext.BaseDirectory, "settings.json");
 
         public static void Save()
         {
-            File.WriteAllText(fileName, JsonSerializer.Serialize(_config, new JsonSerializerOptions { WriteIndented = true }));
+            File.WriteAllText(filePath, JsonSerializer.Serialize(_config, new JsonSerializerOptions { WriteIndented = true }));
         }
 
         public static void Load()
         {
-            if (!File.Exists(fileName))
+            if (!File.Exists(filePath))
                 CreateNewConfig();
 
             try
             {
-                _config = JsonSerializer.Deserialize<Config>(File.ReadAllText(fileName));
+                _config = JsonSerializer.Deserialize<Config>(File.ReadAllText(filePath));
 
                 if (_config.repetitiveMillisecondPeriod == 0)
                     _config.repetitiveMillisecondPeriod = 600000;
@@ -49,7 +50,7 @@ namespace HeadsetBatteryInfo
 
         private static void CreateNewConfig()
         {
-            File.WriteAllText(fileName, JsonSerializer.Serialize(_config, new JsonSerializerOptions { WriteIndented = true }));
+            File.WriteAllText(filePath, JsonSerializer.Serialize(_config, new JsonSerializerOptions { WriteIndented = true }));
         }
     }
 }

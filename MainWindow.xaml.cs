@@ -330,7 +330,7 @@ namespace HeadsetBatteryInfo
             if (sound == null)
             {
                 sound = new SoundPlayer();
-                sound.SoundLocation = "Assets/Sounds/charging_stopped.wav";
+                sound.SoundLocation = System.IO.Path.Combine(AppContext.BaseDirectory, "Assets", "Sounds", "charging_stopped.wav");
                 sound.Load();
             }
 
